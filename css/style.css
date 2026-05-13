@@ -168,11 +168,15 @@ h3 { font-size: 0.9375rem; font-weight: 600; }
 
 /* Red CTA — used on hero "Shop the Collection" */
 .btn-red {
-  background: var(--red); color: var(--white); border-color: var(--red);
+  background: #C8102E !important;
+  color: #FFFFFF !important;
+  border-color: #C8102E !important;
 }
 .btn-red:hover {
-  background: #a50d25; border-color: #a50d25;
-  transform: translateY(-1px); box-shadow: 0 4px 20px rgba(200,16,46,.35);
+  background: #a50d25 !important;
+  border-color: #a50d25 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(200,16,46,.40);
 }
 .btn-red:active { transform: scale(0.97); box-shadow: none; }
 
