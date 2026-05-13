@@ -149,9 +149,13 @@ h3 { font-size: 0.9375rem; font-weight: 600; }
   padding: 12px 28px; border-radius: var(--radius);
   font-size: 0.875rem; font-weight: 600; letter-spacing: 0.02em;
   border: 2px solid transparent;
-  transition: background var(--ease), border-color var(--ease), transform var(--ease), box-shadow var(--ease);
+  /* Specific properties — never transition: all */
+  transition: background 0.18s ease-out, border-color 0.18s ease-out,
+              transform 0.16s ease-out, box-shadow 0.18s ease-out;
   cursor: pointer;
 }
+.btn:active { transform: scale(0.97); }
+
 .btn-primary {
   background: var(--navy); color: var(--white); border-color: var(--navy);
 }
@@ -159,7 +163,18 @@ h3 { font-size: 0.9375rem; font-weight: 600; }
   background: var(--red); border-color: var(--red);
   transform: translateY(-1px); box-shadow: var(--shadow);
 }
+.btn-primary:active { transform: scale(0.97); box-shadow: none; }
 .btn-primary.added { background: #16a34a; border-color: #16a34a; }
+
+/* Red CTA — used on hero "Shop the Collection" */
+.btn-red {
+  background: var(--red); color: var(--white); border-color: var(--red);
+}
+.btn-red:hover {
+  background: #a50d25; border-color: #a50d25;
+  transform: translateY(-1px); box-shadow: 0 4px 20px rgba(200,16,46,.35);
+}
+.btn-red:active { transform: scale(0.97); box-shadow: none; }
 
 .btn-outline {
   background: transparent; color: var(--white); border-color: rgba(255,255,255,.4);
