@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cart — Wornsum</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ── Navbar ─────────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" aria-label="Wornsum home">
+        <svg class="logo-badge" width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="34" height="34" rx="4" fill="#0D1F3C"/>
+          <rect y="11" width="34" height="12" fill="white"/>
+          <line x1="2" y1="17" x2="32" y2="17" stroke="#C8102E" stroke-width="2.2" stroke-dasharray="5 3" stroke-linecap="round"/>
+        </svg>
+        Wornsum
+      </a>
+
+      <ul class="nav-links" role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+
+      <div class="nav-right">
+        <a href="cart.html" class="cart-link" aria-label="View cart">
+          <span class="cart-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <span class="cart-badge" aria-live="polite">0</span>
+          </span>
+        </a>
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page">
+
+    <!-- ── Page header ────────────────────────────────────────── -->
+    <header class="cart-page-header">
+      <div class="cart-page-header-inner">
+        <span class="section-tag">Checkout</span>
+        <h1>Your Cart</h1>
+      </div>
+    </header>
+
+    <div class="section">
+      <div class="section-inner">
+
+        <!-- ── Empty state ────────────────────────────────────── -->
+        <div id="cart-empty" class="cart-empty-state" style="display:none;">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          <h2>Your cart is empty</h2>
+          <p>Head to the shop to find something you'll love.</p>
+          <a href="shop.html" class="btn btn-primary" style="margin-top:8px;">Browse the Collection</a>
+        </div>
+
+        <!-- ── Order success ──────────────────────────────────── -->
+        <div id="order-success" class="order-success" style="display:none;">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <h2>Order Received!</h2>
+          <p>Thanks for your order. We'll reach out to confirm details and arrange shipping.</p>
+          <a href="shop.html" class="btn btn-primary" style="margin-top:8px;">Continue Shopping</a>
+        </div>
+
+        <!-- ── Cart layout (items + checkout sidebar) ─────────── -->
+        <div class="cart-layout">
+
+          <!-- Items column (populated by main.js) -->
+          <div id="cart-items"></div>
+
+          <!-- Checkout sidebar -->
+          <aside id="checkout-section" class="checkout-card">
+            <h2>Order Summary</h2>
+
+            <div class="checkout-divider"></div>
+
+            <div class="cart-total-row">
+              <span class="cart-total-label">Total</span>
+              <span class="cart-total-amount" id="cart-total">$0.00</span>
+            </div>
+
+            <!--
+              Formspree setup:
+              1. Go to https://formspree.io and sign up (free)
+              2. Create a new form and get your form ID
+              3. Replace YOUR_FORM_ID below
+            -->
+            <form id="checkout-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" novalidate>
+
+              <div class="form-group">
+                <label for="co-name">Full Name</label>
+                <input type="text" id="co-name" name="name" placeholder="Jane Smith" required />
+              </div>
+
+              <div class="form-group">
+                <label for="co-email">Email</label>
+                <input type="email" id="co-email" name="email" placeholder="jane@email.com" required />
+              </div>
+
+              <div class="form-group">
+                <label for="co-address">Shipping Address</label>
+                <textarea id="co-address" name="shipping_address" rows="3"
+                          placeholder="Street, City, State, ZIP" required
+                          style="min-height:80px;"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="co-note">Order Note <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+                <input type="text" id="co-note" name="note" placeholder="Any questions or special requests?" />
+              </div>
+
+              <!-- Hidden field populated by main.js with cart details -->
+              <input type="hidden" name="order_summary" />
+
+              <button type="submit" class="btn btn-primary btn-full">Place Order</button>
+
+              <p class="formspree-note">
+                We'll confirm your order via email and arrange payment &amp; shipping.
+              </p>
+
+            </form>
+          </aside>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Footer ─────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <svg width="28" height="28" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="34" height="34" rx="4" fill="#0D1F3C"/>
+            <rect y="11" width="34" height="12" fill="white"/>
+            <line x1="2" y1="17" x2="32" y2="17" stroke="#C8102E" stroke-width="2.2" stroke-dasharray="5 3" stroke-linecap="round"/>
+          </svg>
+          <span class="footer-logo-text">Wornsum</span>
+        </div>
+        <p class="footer-tagline">Premium pieces, worn with intention.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <p class="footer-nav-title">Navigate</p>
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="contact.html">Contact</a>
+        <a href="cart.html">Cart</a>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Wornsum. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

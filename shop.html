@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop — Wornsum</title>
+  <meta name="description" content="Browse the full Wornsum collection of curated secondhand clothing." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ── Navbar ─────────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" aria-label="Wornsum home">
+        <svg class="logo-badge" width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="34" height="34" rx="4" fill="#0D1F3C"/>
+          <rect y="11" width="34" height="12" fill="white"/>
+          <line x1="2" y1="17" x2="32" y2="17" stroke="#C8102E" stroke-width="2.2" stroke-dasharray="5 3" stroke-linecap="round"/>
+        </svg>
+        Wornsum
+      </a>
+
+      <ul class="nav-links" role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+
+      <div class="nav-right">
+        <a href="cart.html" class="cart-link" aria-label="View cart">
+          <span class="cart-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <span class="cart-badge" aria-live="polite">0</span>
+          </span>
+        </a>
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page">
+
+    <!-- ── Page header ────────────────────────────────────────── -->
+    <header class="shop-hero">
+      <div class="shop-hero-inner">
+        <span class="section-tag">Collection</span>
+        <h1>The Collection</h1>
+        <p>Hand-picked pieces, ready for their next chapter.</p>
+      </div>
+    </header>
+
+    <!-- ── Products ───────────────────────────────────────────── -->
+    <section class="section">
+      <div class="section-inner">
+
+        <!-- Category filters -->
+        <div class="filter-bar" role="group" aria-label="Filter by category">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="Tops">Tops</button>
+          <button class="filter-btn" data-filter="Bottoms">Bottoms</button>
+          <button class="filter-btn" data-filter="Outerwear">Outerwear</button>
+          <button class="filter-btn" data-filter="Accessories">Accessories</button>
+        </div>
+
+        <!-- Grid populated by main.js -->
+        <div class="product-grid" id="product-grid"></div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Footer ─────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <svg width="28" height="28" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="34" height="34" rx="4" fill="#0D1F3C"/>
+            <rect y="11" width="34" height="12" fill="white"/>
+            <line x1="2" y1="17" x2="32" y2="17" stroke="#C8102E" stroke-width="2.2" stroke-dasharray="5 3" stroke-linecap="round"/>
+          </svg>
+          <span class="footer-logo-text">Wornsum</span>
+        </div>
+        <p class="footer-tagline">Premium pieces, worn with intention.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <p class="footer-nav-title">Navigate</p>
+        <a href="index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="contact.html">Contact</a>
+        <a href="cart.html">Cart</a>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Wornsum. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
