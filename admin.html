@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Admin — Wornsum</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Tokens (mirrors style.css) ─────────────────────── */
+    :root {
+      --navy:       #0D1F3C;
+      --white:      #FFFFFF;
+      --red:        #C8102E;
+      --cream:      #E8DFCF;
+      --bg:         #F5F1EB;
+      --text:       #1A1A1A;
+      --muted:      #6B7280;
+      --border:     #DDD6C8;
+      --green:      #16a34a;
+      --green-bg:   #DCFCE7;
+      --red-bg:     #FEE2E2;
+      --radius:     10px;
+      --radius-sm:  6px;
+      --ease:       0.2s ease;
+      --font:       'Inter', system-ui, sans-serif;
+      --nav-h:      64px;
+      --shadow:     0 4px 20px rgba(13,31,60,.10);
+      --shadow-lg:  0 8px 40px rgba(13,31,60,.16);
+    }
+
+    /* ── Reset ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html  { scroll-behavior: smooth; }
+    body  {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    img   { display: block; max-width: 100%; }
+    a     { text-decoration: none; color: inherit; }
+    button { font-family: var(--font); cursor: pointer; border: none; background: none; }
+    input, select, textarea { font-family: var(--font); }
+
+    /* ── Buttons ─────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 11px 22px; border-radius: var(--radius-sm);
+      font-size: 0.875rem; font-weight: 600;
+      border: 2px solid transparent;
+      transition: all var(--ease); cursor: pointer; white-space: nowrap;
+    }
+    .btn-primary { background: var(--navy); color: var(--white); border-color: var(--navy); }
+    .btn-primary:hover:not(:disabled) { background: var(--red); border-color: var(--red); }
+    .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-ghost   { background: transparent; color: var(--navy); border-color: var(--border); }
+    .btn-ghost:hover { border-color: var(--navy); background: var(--bg); }
+    .btn-danger  { background: transparent; color: var(--red); border-color: #FCA5A5; }
+    .btn-danger:hover { background: var(--red-bg); border-color: var(--red); }
+    .btn-sm      { padding: 7px 14px; font-size: 0.8125rem; }
+    .btn-full    { width: 100%; }
+    .btn-icon    {
+      width: 38px; height: 38px; padding: 0; border-radius: var(--radius-sm);
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Form elements ───────────────────────────────────── */
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; margin-bottom: 6px;
+      font-size: 0.8125rem; font-weight: 600; color: var(--text);
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font-size: 0.9375rem; color: var(--text); background: var(--white);
+      outline: none; appearance: none;
+      transition: border-color var(--ease), box-shadow var(--ease);
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--navy);
+      box-shadow: 0 0 0 3px rgba(13,31,60,.08);
+    }
+    .form-group textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-hint { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+    /* ── Toggle switch ───────────────────────────────────── */
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; background: var(--bg); border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+    }
+    .toggle-label { font-size: 0.875rem; font-weight: 600; }
+    .toggle-desc  { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+    .switch       { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch-track {
+      position: absolute; inset: 0; border-radius: 12px;
+      background: var(--border); transition: background var(--ease); cursor: pointer;
+    }
+    .switch-track::before {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; border-radius: 50%;
+      top: 3px; left: 3px; background: white;
+      transition: transform var(--ease);
+      box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    }
+    .switch input:checked + .switch-track { background: var(--navy); }
+    .switch input:checked + .switch-track::before { transform: translateX(20px); }
+
+    /* ── Admin navbar ────────────────────────────────────── */
+    .admin-nav {
+      position: sticky; top: 0; z-index: 100;
+      height: var(--nav-h);
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 0 0 rgba(200,16,46,.12);
+      display: flex; align-items: center;
+    }
+    .admin-nav-inner {
+      max-width: 1200px; width: 100%; margin: 0 auto;
+      padding: 0 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .admin-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 800; font-size: 1rem; letter-spacing: .08em;
+      color: var(--navy); text-transform: uppercase;
+    }
+    .admin-pill {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--red);
+      background: #FEE2E2; padding: 3px 8px; border-radius: 100px;
+    }
+    .admin-nav-actions { display: flex; align-items: center; gap: 8px; }
+
+    /* ── Page wrapper ────────────────────────────────────── */
+    .admin-page { max-width: 1200px; margin: 0 auto; padding: 32px 20px 80px; }
+
+    /* ── Section header ──────────────────────────────────── */
+    .section-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; gap: 12px;
+    }
+    .section-title { font-size: 1.25rem; font-weight: 700; color: var(--navy); }
+    .section-count {
+      font-size: 0.8125rem; color: var(--muted); font-weight: 500; margin-top: 2px;
+    }
+
+    /* ── Loading state ───────────────────────────────────── */
+    .loading-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 80px 24px; gap: 16px;
+    }
+    .spinner {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: var(--navy);
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 0.9375rem; color: var(--muted); }
+
+    /* ── Product grid (admin) ────────────────────────────── */
+    .admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .admin-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      transition: box-shadow var(--ease);
+    }
+    .admin-card:hover { box-shadow: var(--shadow); }
+    .admin-card-img {
+      aspect-ratio: 1; background: var(--cream); overflow: hidden; position: relative;
+    }
+    .admin-card-img img { width: 100%; height: 100%; object-fit: cover; }
+    .featured-chip {
+      position: absolute; top: 10px; left: 10px;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--white);
+      background: var(--navy); padding: 3px 9px; border-radius: 100px;
+    }
+    .admin-card-body { padding: 14px 16px 16px; }
+    .admin-card-name { font-weight: 700; color: var(--text); margin-bottom: 6px; font-size: 0.9375rem; }
+    .admin-card-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .meta-tag {
+      font-size: 0.7rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 100px;
+    }
+    .meta-price { background: var(--navy); color: var(--white); }
+    .meta-size  { background: var(--cream); color: var(--text); }
+    .meta-cat   { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+    .admin-card-actions { display: flex; gap: 8px; }
+
+    /* ── Empty state ─────────────────────────────────────── */
+    .empty-state {
+      grid-column: 1 / -1;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 72px 24px; text-align: center; gap: 12px;
+    }
+    .empty-icon { color: var(--border); margin-bottom: 4px; }
+    .empty-title { font-size: 1.125rem; font-weight: 700; color: var(--navy); }
+    .empty-sub   { font-size: 0.9rem; color: var(--muted); max-width: 260px; }
+
+    /* ── Setup screen ────────────────────────────────────── */
+    #setup-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 24px; background: var(--bg);
+    }
+    .setup-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 40px 36px;
+      max-width: 480px; width: 100%;
+      box-shadow: var(--shadow-lg);
+    }
+    .setup-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+    .setup-logo-text { font-weight: 800; font-size: 1.05rem; letter-spacing: .1em; text-transform: uppercase; color: var(--navy); }
+    .setup-title { font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+    .setup-sub   { font-size: 0.9rem; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+    .setup-steps {
+      background: var(--bg); border-radius: var(--radius-sm); padding: 16px 20px;
+      margin-bottom: 24px; border: 1px solid var(--border);
+    }
+    .setup-steps p { font-size: 0.8125rem; font-weight: 600; color: var(--navy); margin-bottom: 10px; }
+    .setup-steps ol { padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+    .setup-steps li { font-size: 0.8125rem; color: var(--muted); }
+    .setup-steps a  { color: var(--navy); text-decoration: underline; font-weight: 600; }
+    .setup-steps code {
+      background: var(--cream); padding: 1px 6px; border-radius: 4px;
+      font-family: monospace; font-size: 0.8rem;
+    }
+    .token-input-wrap { position: relative; margin-bottom: 16px; }
+    .token-input-wrap input { padding-right: 42px; font-family: monospace; font-size: 0.85rem; }
+    .token-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); padding: 4px; cursor: pointer;
+    }
+
+    /* ── Modal overlay ───────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(13,31,60,.4);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: flex-end; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity var(--ease);
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal-sheet {
+      background: var(--white);
+      border-radius: 16px 16px 0 0;
+      width: 100%; max-height: 92vh;
+      overflow-y: auto; overflow-x: hidden;
+      transform: translateY(100%); transition: transform .3s cubic-bezier(.32,.72,0,1);
+      -webkit-overflow-scrolling: touch;
+    }
+    .modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+    @media (min-width: 640px) {
+      .modal-overlay { align-items: center; }
+      .modal-sheet {
+        border-radius: var(--radius);
+        width: min(560px, 95vw); max-height: 88vh;
+        transform: scale(.95) translateY(8px);
+        transition: transform .25s cubic-bezier(.32,.72,0,1), opacity .25s ease;
+        opacity: 0;
+      }
+      .modal-overlay.open .modal-sheet { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .modal-drag {
+      width: 40px; height: 4px; border-radius: 2px;
+      background: var(--border); margin: 14px auto 0;
+    }
+    @media (min-width: 640px) { .modal-drag { display: none; } }
+
+    .modal-header {
+      padding: 20px 24px 0;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; background: var(--white); z-index: 1;
+      border-bottom: 1px solid var(--border); padding-bottom: 16px;
+    }
+    .modal-title { font-size: 1.125rem; font-weight: 700; color: var(--navy); }
+    .modal-close {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; color: var(--muted);
+      transition: background var(--ease);
+    }
+    .modal-close:hover { background: var(--bg); color: var(--text); }
+
+    .modal-body   { padding: 24px; }
+    .modal-footer {
+      padding: 16px 24px 24px; display: flex; gap: 10px;
+      position: sticky; bottom: 0; background: var(--white);
+      border-top: 1px solid var(--border);
+    }
+    @media (max-width: 639px) {
+      .modal-footer { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+    }
+
+    /* ── Image upload area ───────────────────────────────── */
+    .image-upload-area {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      background: var(--bg); cursor: pointer; overflow: hidden;
+      transition: border-color var(--ease), background var(--ease);
+      margin-bottom: 20px; position: relative;
+    }
+    .image-upload-area:hover,
+    .image-upload-area.drag-over { border-color: var(--navy); background: var(--cream); }
+    .image-upload-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-prompt {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 36px 24px; gap: 10px; pointer-events: none;
+    }
+    .upload-icon { color: var(--muted); }
+    .upload-prompt p { font-size: 0.875rem; font-weight: 600; color: var(--muted); }
+    .upload-prompt span { font-size: 0.75rem; color: var(--border); }
+    #image-preview-wrap {
+      display: none; aspect-ratio: 1; position: relative;
+    }
+    #image-preview-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-change-btn {
+      position: absolute; bottom: 10px; right: 10px;
+      background: rgba(13,31,60,.75); color: white;
+      font-size: 0.75rem; font-weight: 600; padding: 6px 12px;
+      border-radius: var(--radius-sm); pointer-events: none;
+    }
+
+    /* ── Delete confirm modal ────────────────────────────── */
+    .confirm-overlay {
+      position: fixed; inset: 0; z-index: 400;
+      background: rgba(13,31,60,.5); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+      opacity: 0; pointer-events: none; transition: opacity var(--ease);
+    }
+    .confirm-overlay.open { opacity: 1; pointer-events: all; }
+    .confirm-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 28px; max-width: 380px; width: 100%;
+      box-shadow: var(--shadow-lg);
+      transform: scale(.96); transition: transform .2s ease;
+    }
+    .confirm-overlay.open .confirm-card { transform: scale(1); }
+    .confirm-card h3 { font-size: 1.0625rem; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+    .confirm-card p  { font-size: 0.9rem; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+    .confirm-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* ── Toast ───────────────────────────────────────────── */
+    #toast-wrap {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      z-index: 500; display: flex; flex-direction: column; align-items: center; gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 20px; border-radius: 100px;
+      font-size: 0.875rem; font-weight: 600; white-space: nowrap;
+      box-shadow: var(--shadow-lg);
+      animation: toastIn .25s ease, toastOut .3s ease 2.5s forwards;
+    }
+    .toast-success { background: var(--navy); color: white; }
+    .toast-error   { background: var(--red);  color: white; }
+    @keyframes toastIn  { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+    @keyframes toastOut { from { opacity:1; } to { opacity:0; transform: translateY(8px); } }
+
+    /* ── Save status indicator ───────────────────────────── */
+    .save-status {
+      font-size: 0.8125rem; color: var(--muted); display: flex; align-items: center; gap: 6px;
+    }
+    .save-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+
+    /* ── FAB (mobile add button) ─────────────────────────── */
+    .fab {
+      position: fixed; bottom: 24px; right: 20px; z-index: 90;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--navy); color: white;
+      display: none; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-lg); font-size: 1.5rem;
+      transition: background var(--ease), transform var(--ease);
+    }
+    .fab:hover { background: var(--red); transform: scale(1.05); }
+    @media (max-width: 640px) {
+      .fab { display: flex; }
+      .desktop-add-btn { display: none !important; }
+    }
+
+    /* ── Responsive ──────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .setup-card { padding: 28px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+      .admin-card-actions .btn span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Toast container ──────────────────────────────────── -->
+<div id="toast-wrap"></div>
+
+<!-- ── Delete confirm modal ─────────────────────────────── -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-card">
+    <h3>Delete Product?</h3>
+    <p id="confirm-msg">This will permanently remove the product from your store.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="confirm-ok-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SETUP SCREEN (shown until token is entered)
+     ═══════════════════════════════════════════════════════ -->
+<div id="setup-screen" style="display:none;">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <svg width="32" height="32" viewBox="0 0 34 34" fill="none">
+        <rect width="34" height="34" rx="4" fill="#E8DFCF"/>
+        <rect y="0" width="34" height="7" fill="#0D1F3C"/>
+        <rect y="13" width="34" height="8" fill="#0D1F3C"/>
+        <rect y="27" width="34" height="7" fill="#0D1F3C"/>
+        <polyline points="0,17 4.5,12 9,17 13.5,12 18,17 22.5,12 27,17 31.5,12 34,14.5"
+          stroke="#C8102E" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="setup-logo-text">Wornsum</span>
+      <span class="admin-pill">Admin</span>
+    </div>
+
+    <h2 class="setup-title">Connect your GitHub account</h2>
+    <p class="setup-sub">
+      This admin panel saves your products directly to GitHub so the live site updates automatically. You only need to do this setup once per device.
+    </p>
+
+    <div class="setup-steps">
+      <p>How to get your token:</p>
+      <ol>
+        <li>Go to <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a></li>
+        <li>Give it any name (e.g. <code>wornsum-admin</code>)</li>
+        <li>Select the <code>repo</code> scope checkbox</li>
+        <li>Click <strong>Generate token</strong> and copy it</li>
+      </ol>
+    </div>
+
+    <div class="form-group">
+      <label for="token-input">Personal Access Token</label>
+      <div class="token-input-wrap">
+        <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+               autocomplete="off" spellcheck="false" />
+        <button class="token-toggle" onclick="toggleTokenVisibility()" id="token-toggle-btn" type="button">
+          <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+      <p class="form-hint">Stored locally on this device only. Never sent anywhere except GitHub's API.</p>
+    </div>
+
+    <button class="btn btn-primary btn-full" onclick="connectGitHub()" id="connect-btn">
+      Connect &amp; Open Admin
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN ADMIN UI
+     ═══════════════════════════════════════════════════════ -->
+<div id="admin-main" style="display:none;">
+
+  <!-- Navbar -->
+  <nav class="admin-nav">
+    <div class="admin-nav-inner">
+      <div class="admin-logo">
+        <svg width="30" height="30" viewBox="0 0 34 34" fill="none">
+          <rect width="34" height="34" rx="4" fill="#E8DFCF"/>
+          <rect y="0" width="34" height="7" fill="#0D1F3C"/>
+          <rect y="13" width="34" height="8" fill="#0D1F3C"/>
+          <rect y="27" width="34" height="7" fill="#0D1F3C"/>
+          <polyline points="0,17 4.5,12 9,17 13.5,12 18,17 22.5,12 27,17 31.5,12 34,14.5"
+            stroke="#C8102E" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Wornsum</span>
+        <span class="admin-pill">Admin</span>
+      </div>
+      <div class="admin-nav-actions">
+        <a href="index.html" class="btn btn-ghost btn-sm" target="_blank">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+          <span>View Site</span>
+        </a>
+        <button class="btn btn-primary btn-sm desktop-add-btn" onclick="openAddModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Product
+        </button>
+        <button class="btn btn-icon btn-ghost" onclick="signOut()" title="Sign out" style="color:var(--muted)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page body -->
+  <div class="admin-page">
+    <div class="section-hd">
+      <div>
+        <div class="section-title">Products</div>
+        <div class="section-count" id="product-count">Loading…</div>
+      </div>
+      <div id="save-status-wrap" style="display:none;">
+        <div class="save-status">
+          <div class="save-dot"></div>
+          Live on site in ~30s
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div class="loading-wrap" id="products-loading">
+      <div class="spinner"></div>
+      <p class="loading-text">Loading products from GitHub…</p>
+    </div>
+
+    <!-- Product grid -->
+    <div class="admin-grid" id="product-grid" style="display:none;"></div>
+  </div>
+
+  <!-- FAB for mobile -->
+  <button class="fab" onclick="openAddModal()" aria-label="Add product">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PRODUCT MODAL (add / edit)
+     ═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="product-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-title">Add Product</h2>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Image upload -->
+      <div class="image-upload-area" id="image-upload-area">
+        <input type="file" id="image-input" accept="image/*" />
+        <div class="upload-prompt" id="upload-prompt">
+          <svg class="upload-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          <p>Tap to upload photo</p>
+          <span>JPG, PNG, WEBP — max 5MB</span>
+        </div>
+        <div id="image-preview-wrap">
+          <img id="image-preview" src="" alt="Product preview" />
+          <span class="preview-change-btn">Change photo</span>
+        </div>
+      </div>
+
+      <!-- Product fields -->
+      <div class="form-group">
+        <label for="f-name">Product Name</label>
+        <input type="text" id="f-name" placeholder="e.g. Vintage Levi's Trucker Jacket" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="f-price">Price ($)</label>
+          <input type="number" id="f-price" placeholder="85" min="0" step="1" />
+        </div>
+        <div class="form-group">
+          <label for="f-size">Size</label>
+          <input type="text" id="f-size" placeholder="M, 32W, One Size…" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="f-category">Category</label>
+        <select id="f-category">
+          <option value="Tops">Tops</option>
+          <option value="Bottoms">Bottoms</option>
+          <option value="Outerwear">Outerwear</option>
+          <option value="Accessories">Accessories</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="f-description">Description</label>
+        <textarea id="f-description" placeholder="Brief description of the item, condition, fit…"></textarea>
+      </div>
+
+      <div class="form-group">
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Featured on Home page</div>
+            <div class="toggle-desc">Show this product in the Top Picks section</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="f-featured" />
+            <span class="switch-track"></span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-full" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary btn-full" id="save-btn" onclick="saveProduct()">
+        Save Product
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════ -->
+<script>
+// ── Config ────────────────────────────────────────────────
+const OWNER = 'ikexw';
+const REPO  = 'wornsum';
+const API   = 'https://api.github.com';
+
+// ── State ─────────────────────────────────────────────────
+let allProducts   = [];
+let productsSha   = null;   // GitHub SHA of products.js (needed for PUT)
+let editingId     = null;   // null = adding, number = editing
+let pendingImage  = null;   // { base64, filename, mimeType } or null
+let confirmCallback = null;
+
+// ── Token management ──────────────────────────────────────
+function getToken()      { return localStorage.getItem('wornsum_gh_token'); }
+function setToken(t)     { localStorage.setItem('wornsum_gh_token', t); }
+function clearToken()    { localStorage.removeItem('wornsum_gh_token'); }
+
+function headers() {
+  return {
+    Authorization: `token ${getToken()}`,
+    Accept: 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
+}
+
+// ── Boot ─────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  if (getToken()) {
+    showAdmin();
+    loadProducts();
+  } else {
+    document.getElementById('setup-screen').style.display = 'flex';
+  }
+});
+
+function showAdmin() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('admin-main').style.display   = 'block';
+}
+
+// ── Setup screen ──────────────────────────────────────────
+function toggleTokenVisibility() {
+  const inp = document.getElementById('token-input');
+  const ico = document.getElementById('eye-icon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    ico.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+  } else {
+    inp.type = 'password';
+    ico.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  }
+}
+
+async function connectGitHub() {
+  const token = document.getElementById('token-input').value.trim();
+  if (!token) { toast('Please paste your token first.', 'error'); return; }
+
+  const btn = document.getElementById('connect-btn');
+  btn.disabled = true;
+  btn.textContent = 'Verifying…';
+
+  try {
+    const res = await fetch(`${API}/repos/${OWNER}/${REPO}`, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) throw new Error('Token invalid or no repo access.');
+    setToken(token);
+    showAdmin();
+    loadProducts();
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Connect & Open Admin';
+    toast(e.message, 'error');
+  }
+}
+
+function signOut() {
+  clearToken();
+  location.reload();
+}
+
+// ── GitHub API helpers ────────────────────────────────────
+async function getFile(path) {
+  const res = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${path}`, { headers: headers() });
+  if (!res.ok) throw new Error(`GitHub: could not read ${path} (${res.status})`);
+  return res.json();
+}
+
+async function putFile(path, content, sha, message) {
+  // btoa with full unicode support
+  const b64 = btoa(unescape(encodeURIComponent(content)));
+  const body = { message, content: b64 };
+  if (sha) body.sha = sha;
+
+  const res = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${path}`, {
+    method: 'PUT', headers: headers(), body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `GitHub: could not write ${path}`);
+  }
+  return res.json();
+}
+
+// ── Load products from repo ───────────────────────────────
+async function loadProducts() {
+  document.getElementById('products-loading').style.display = 'flex';
+  document.getElementById('product-grid').style.display     = 'none';
+
+  try {
+    const file    = await getFile('js/products.js');
+    productsSha   = file.sha;
+    const source  = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))));
+    const match   = source.match(/const products\s*=\s*(\[[\s\S]*?\]);/);
+    if (!match) throw new Error('Could not parse products.js — unexpected format.');
+    allProducts   = new Function('return ' + match[1])();
+    renderGrid();
+  } catch (e) {
+    toast(e.message, 'error');
+    document.getElementById('products-loading').innerHTML =
+      `<p style="color:var(--red);text-align:center;padding:24px;">${e.message}</p>`;
+  }
+}
+
+// ── Render admin product grid ─────────────────────────────
+function renderGrid() {
+  const grid = document.getElementById('product-grid');
+  const loading = document.getElementById('products-loading');
+  const count   = document.getElementById('product-count');
+
+  loading.style.display = 'none';
+  grid.style.display    = 'grid';
+  count.textContent     = `${allProducts.length} product${allProducts.length !== 1 ? 's' : ''}`;
+
+  grid.innerHTML = '';
+
+  if (allProducts.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <svg class="empty-icon" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/><path d="M8 7V5a2 2 0 0 0-4 0v2"/>
+        </svg>
+        <p class="empty-title">No products yet</p>
+        <p class="empty-sub">Tap the + button to add your first product.</p>
+      </div>`;
+    return;
+  }
+
+  allProducts.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'admin-card';
+    card.innerHTML = `
+      <div class="admin-card-img">
+        <img src="${p.image}" alt="${p.name}"
+             onerror="this.src='images/placeholder.svg'">
+        ${p.featured ? '<span class="featured-chip">Featured</span>' : ''}
+      </div>
+      <div class="admin-card-body">
+        <div class="admin-card-name">${p.name}</div>
+        <div class="admin-card-meta">
+          <span class="meta-tag meta-price">$${p.price}</span>
+          <span class="meta-tag meta-size">${p.size}</span>
+          <span class="meta-tag meta-cat">${p.category}</span>
+        </div>
+        <div class="admin-card-actions">
+          <button class="btn btn-ghost btn-sm" onclick="openEditModal(${p.id})" style="flex:1;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            <span>Edit</span>
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete(${p.id})" style="flex:1;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+              <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+            <span>Delete</span>
+          </button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ── Modal: open for add ───────────────────────────────────
+function openAddModal() {
+  editingId   = null;
+  pendingImage = null;
+  document.getElementById('modal-title').textContent = 'Add Product';
+  document.getElementById('f-name').value        = '';
+  document.getElementById('f-price').value       = '';
+  document.getElementById('f-size').value        = '';
+  document.getElementById('f-category').value    = 'Tops';
+  document.getElementById('f-description').value = '';
+  document.getElementById('f-featured').checked  = false;
+  resetImageUpload();
+  openModal();
+}
+
+// ── Modal: open for edit ──────────────────────────────────
+function openEditModal(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  editingId    = id;
+  pendingImage = null;
+
+  document.getElementById('modal-title').textContent = 'Edit Product';
+  document.getElementById('f-name').value        = p.name;
+  document.getElementById('f-price').value       = p.price;
+  document.getElementById('f-size').value        = p.size;
+  document.getElementById('f-category').value    = p.category;
+  document.getElementById('f-description').value = p.description || '';
+  document.getElementById('f-featured').checked  = !!p.featured;
+
+  // Show existing image
+  if (p.image && p.image !== 'images/placeholder.svg') {
+    showImagePreview(p.image);
+  } else {
+    resetImageUpload();
+  }
+  openModal();
+}
+
+function openModal() {
+  document.getElementById('product-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('f-name').focus(), 350);
+}
+
+function closeModal() {
+  document.getElementById('product-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close modal on overlay click
+document.getElementById('product-modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ── Image upload handling ─────────────────────────────────
+document.getElementById('image-input').addEventListener('change', handleImageSelect);
+
+const uploadArea = document.getElementById('image-upload-area');
+uploadArea.addEventListener('dragover',  (e) => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+uploadArea.addEventListener('dragleave', ()  => uploadArea.classList.remove('drag-over'));
+uploadArea.addEventListener('drop',      (e) => {
+  e.preventDefault();
+  uploadArea.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) processImageFile(e.dataTransfer.files[0]);
+});
+
+function handleImageSelect(e) {
+  const file = e.target.files[0];
+  if (file) processImageFile(file);
+}
+
+function processImageFile(file) {
+  if (file.size > 5 * 1024 * 1024) { toast('Image must be under 5MB.', 'error'); return; }
+
+  const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+  const filename = `product-${Date.now()}.${ext}`;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    const base64  = dataUrl.split(',')[1];
+    pendingImage  = { base64, filename, mimeType: file.type };
+    showImagePreview(dataUrl);
+  };
+  reader.readAsDataURL(file);
+}
+
+function showImagePreview(src) {
+  document.getElementById('upload-prompt').style.display   = 'none';
+  document.getElementById('image-preview-wrap').style.display = 'block';
+  document.getElementById('image-preview').src = src;
+}
+
+function resetImageUpload() {
+  document.getElementById('upload-prompt').style.display      = 'flex';
+  document.getElementById('image-preview-wrap').style.display = 'none';
+  document.getElementById('image-preview').src = '';
+  document.getElementById('image-input').value = '';
+}
+
+// ── Save product ──────────────────────────────────────────
+async function saveProduct() {
+  const name  = document.getElementById('f-name').value.trim();
+  const price = parseFloat(document.getElementById('f-price').value);
+  const size  = document.getElementById('f-size').value.trim();
+  const cat   = document.getElementById('f-category').value;
+  const desc  = document.getElementById('f-description').value.trim();
+  const feat  = document.getElementById('f-featured').checked;
+
+  if (!name)        { toast('Product name is required.', 'error'); return; }
+  if (!price || isNaN(price)) { toast('Please enter a valid price.', 'error'); return; }
+  if (!size)        { toast('Size is required.', 'error'); return; }
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    let imagePath = 'images/placeholder.svg';
+
+    // Upload image if a new one was selected
+    if (pendingImage) {
+      const imgBody = { message: `Upload product image: ${pendingImage.filename}`, content: pendingImage.base64 };
+      // Check if file already exists (to get its SHA)
+      try {
+        const existing = await getFile(`images/${pendingImage.filename}`);
+        imgBody.sha = existing.sha;
+      } catch { /* new file, no SHA needed */ }
+
+      await fetch(`${API}/repos/${OWNER}/${REPO}/contents/images/${pendingImage.filename}`, {
+        method: 'PUT', headers: headers(), body: JSON.stringify(imgBody)
+      });
+      imagePath = `images/${pendingImage.filename}`;
+    } else if (editingId !== null) {
+      // Keep existing image
+      const existing = allProducts.find(p => p.id === editingId);
+      if (existing) imagePath = existing.image;
+    }
+
+    if (editingId !== null) {
+      // Update existing product
+      const idx = allProducts.findIndex(p => p.id === editingId);
+      allProducts[idx] = { id: editingId, name, category: cat, price, size, image: imagePath, featured: feat, description: desc };
+    } else {
+      // Add new product
+      const newId = allProducts.length > 0 ? Math.max(...allProducts.map(p => p.id)) + 1 : 1;
+      allProducts.push({ id: newId, name, category: cat, price, size, image: imagePath, featured: feat, description: desc });
+    }
+
+    // Commit updated products.js
+    const newContent = buildProductsJs(allProducts);
+    const result = await putFile('js/products.js', newContent, productsSha,
+      editingId !== null ? `Update product: ${name}` : `Add product: ${name}`);
+    productsSha = result.content.sha;
+
+    closeModal();
+    renderGrid();
+    showSaveStatus();
+    toast(editingId !== null ? 'Product updated!' : 'Product added!', 'success');
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Product';
+  }
+}
+
+// ── Delete product ────────────────────────────────────────
+function confirmDelete(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('confirm-msg').textContent =
+    `"${p.name}" will be permanently removed from your store.`;
+  document.getElementById('confirm-ok-btn').onclick = () => deleteProduct(id);
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('open');
+}
+
+async function deleteProduct(id) {
+  closeConfirm();
+  const p = allProducts.find(x => x.id === id);
+  allProducts = allProducts.filter(x => x.id !== id);
+
+  try {
+    const newContent = buildProductsJs(allProducts);
+    const result = await putFile('js/products.js', newContent, productsSha,
+      `Remove product: ${p ? p.name : id}`);
+    productsSha = result.content.sha;
+    renderGrid();
+    showSaveStatus();
+    toast('Product deleted.', 'success');
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+// ── Build products.js source ──────────────────────────────
+function buildProductsJs(products) {
+  return `// ============================================================
+//  PRODUCTS  —  managed via Wornsum Admin (admin.html)
+//  You can also edit this file directly.
+// ============================================================
+
+const products = ${JSON.stringify(products, null, 2)};
+`;
+}
+
+// ── Save status indicator ─────────────────────────────────
+function showSaveStatus() {
+  const wrap = document.getElementById('save-status-wrap');
+  wrap.style.display = 'flex';
+  setTimeout(() => { wrap.style.display = 'none'; }, 8000);
+}
+
+// ── Toast notifications ───────────────────────────────────
+function toast(message, type = 'success') {
+  const wrap = document.getElementById('toast-wrap');
+  const el   = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = message;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ── Close confirm overlay on outside click ────────────────
+document.getElementById('confirm-overlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeConfirm();
+});
+</script>
+</body>
+</html>
