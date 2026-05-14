@@ -1,6 +1,6 @@
 // ── Cloudflare Worker URL ─────────────────────────────────────
 // Replace with your actual Worker URL after deploying (see setup instructions).
-const WORKER_URL = 'https://wornsum-checkout.YOUR_SUBDOMAIN.workers.dev';
+const WORKER_URL = 'https://wornsum-checkout.wornsum.workers.dev';
 
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
