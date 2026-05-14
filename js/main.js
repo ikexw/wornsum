@@ -1,3 +1,7 @@
+// ── Cloudflare Worker URL ─────────────────────────────────────
+// Replace with your actual Worker URL after deploying (see setup instructions).
+const WORKER_URL = 'https://wornsum-checkout.YOUR_SUBDOMAIN.workers.dev';
+
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
   initMobileNav();
@@ -7,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('product-grid'))   { renderAllProducts(products); initFilters(); }
   if (document.getElementById('cart-items'))     renderCartPage();
   if (document.getElementById('contact-form'))   initContactForm();
+  if (document.getElementById('order-number'))   initSuccessPage();
 });
 
 // ── Mobile nav ────────────────────────────────────────────────
@@ -185,7 +190,7 @@ function renderCartPage() {
   initCheckout();
 }
 
-// ── Checkout form submission via Formspree ────────────────────
+// ── Checkout → Stripe redirect ────────────────────────────────
 function initCheckout() {
   const form = document.getElementById('checkout-form');
   if (!form) return;
@@ -193,48 +198,112 @@ function initCheckout() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const cart  = getCart();
-    const total = getCartTotal();
-    const lines = cart.map(item => {
-      const p = products.find(prod => prod.id === item.id);
-      return p ? `${p.name} x${item.qty}  — $${(p.price * item.qty).toFixed(2)}` : '';
-    }).join('\n');
-
-    // Inject order summary as a hidden field
-    let summaryField = form.querySelector('[name="order_summary"]');
-    if (!summaryField) {
-      summaryField = Object.assign(document.createElement('input'), { type: 'hidden', name: 'order_summary' });
-      form.appendChild(summaryField);
-    }
-    summaryField.value = `${lines}\n\nTOTAL: $${total.toFixed(2)}`;
+    const cart = getCart();
+    if (cart.length === 0) return;
 
     const submitBtn = form.querySelector('[type="submit"]');
-    submitBtn.disabled  = true;
-    submitBtn.textContent = 'Placing order…';
+    submitBtn.disabled    = true;
+    submitBtn.textContent = 'Redirecting…';
+
+    const note = (form.querySelector('[name="note"]')?.value || '').trim();
+
+    // Build cart snapshot with full product details
+    const items = cart.map(item => {
+      const p = products.find(prod => prod.id === item.id);
+      return p ? { id: p.id, name: p.name, price: p.price, size: p.size, qty: item.qty } : null;
+    }).filter(Boolean);
+
+    // Save snapshot so success page can show the receipt
+    sessionStorage.setItem('wornsum_checkout_cart', JSON.stringify(items));
+
+    if (WORKER_URL.includes('YOUR_SUBDOMAIN')) {
+      submitBtn.disabled    = false;
+      submitBtn.textContent = 'Pay with Card';
+      alert('Payment is not yet configured. Please contact us directly to place an order.');
+      return;
+    }
 
     try {
-      const res = await fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: { Accept: 'application/json' }
+      const res  = await fetch(`${WORKER_URL}/checkout`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ items, note }),
       });
+      const data = await res.json();
 
-      if (res.ok) {
-        clearCart();
-        document.getElementById('cart-items').style.display       = 'none';
-        document.getElementById('checkout-section').style.display = 'none';
-        document.getElementById('order-success').style.display    = 'flex';
+      if (data.url) {
+        window.location.href = data.url;
       } else {
-        submitBtn.disabled   = false;
-        submitBtn.textContent = 'Place Order';
-        alert('Something went wrong. Please try again or reach out via the Contact page.');
+        throw new Error(data.error || 'Could not start checkout');
       }
-    } catch {
-      submitBtn.disabled   = false;
-      submitBtn.textContent = 'Place Order';
-      alert('Network error. Check your connection and try again.');
+    } catch (err) {
+      submitBtn.disabled    = false;
+      submitBtn.textContent = 'Pay with Card';
+      alert(`Checkout error: ${err.message}.\nPlease try again or contact us directly.`);
     }
   });
+}
+
+// ── Order confirmation page ───────────────────────────────────
+async function initSuccessPage() {
+  const params    = new URLSearchParams(location.search);
+  const sessionId = params.get('session_id');
+
+  if (!sessionId) {
+    location.href = 'index.html';
+    return;
+  }
+
+  // Generate readable order number from session ID
+  const clean    = sessionId.replace(/[^a-zA-Z0-9]/g, '');
+  const orderNum = 'WRN-' + clean.slice(-8).toUpperCase();
+  document.getElementById('order-number').textContent = orderNum;
+
+  // Render cart items from sessionStorage snapshot
+  const snapshot = JSON.parse(sessionStorage.getItem('wornsum_checkout_cart') || '[]');
+  const itemsEl  = document.getElementById('receipt-items');
+
+  if (snapshot.length > 0) {
+    snapshot.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'receipt-item';
+      row.innerHTML = `
+        <span class="receipt-item-name">${item.name}<span class="receipt-size">Size ${item.size}</span></span>
+        <span class="receipt-qty">× ${item.qty}</span>
+        <span class="receipt-price">$${(item.price * item.qty).toFixed(2)}</span>
+      `;
+      itemsEl.appendChild(row);
+    });
+    const total = snapshot.reduce((sum, i) => sum + i.price * i.qty, 0);
+    document.getElementById('receipt-total').textContent = `$${total.toFixed(2)}`;
+  }
+
+  // Clear cart — Stripe only redirects here on successful payment
+  clearCart();
+  sessionStorage.removeItem('wornsum_checkout_cart');
+
+  // Fetch session from Worker for email + note
+  if (!WORKER_URL.includes('YOUR_SUBDOMAIN')) {
+    try {
+      const res     = await fetch(`${WORKER_URL}/session?id=${encodeURIComponent(sessionId)}`);
+      const session = await res.json();
+
+      if (session.email) {
+        document.getElementById('confirm-email').textContent   = session.email;
+        document.getElementById('confirm-email-row').style.display = 'flex';
+      }
+      if (session.note) {
+        document.getElementById('order-note').textContent      = session.note;
+        document.getElementById('order-note-row').style.display = 'block';
+      }
+      if (session.amount_total) {
+        document.getElementById('receipt-total').textContent =
+          `$${(session.amount_total / 100).toFixed(2)}`;
+      }
+    } catch {
+      // Silently ignore — order is confirmed, receipt is shown from sessionStorage
+    }
+  }
 }
 
 // ── Contact form submission via Formspree ─────────────────────

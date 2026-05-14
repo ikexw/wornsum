@@ -1,0 +1,7 @@
+name = "wornsum-checkout"
+main = "checkout.js"
+compatibility_date = "2024-09-23"
+
+# After deploying, add your Stripe secret key as an encrypted secret:
+#   wrangler secret put STRIPE_SECRET_KEY
+# Never put the actual key in this file.
