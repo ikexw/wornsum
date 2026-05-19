@@ -5,16 +5,6 @@
 
 const products = [
   {
-    "id": 4,
-    "name": "Canvas Tote Bag",
-    "category": "Accessories",
-    "price": 22,
-    "size": "One Size",
-    "image": "images/placeholder.svg",
-    "featured": true,
-    "description": "Heavy natural canvas tote. Minimal branding."
-  },
-  {
     "id": 5,
     "name": "Ribbed Wool Beanie",
     "category": "Accessories",
