@@ -26,9 +26,9 @@ const products = [
   },
   {
     "id": 8,
-    "name": "Insulated Puffer Vest",
+    "name": "Test",
     "category": "Outerwear",
-    "price": 62,
+    "price": 1,
     "size": "L",
     "image": "images/placeholder.svg",
     "featured": false,
