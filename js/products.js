@@ -13,15 +13,5 @@ const products = [
     "image": "images/placeholder.svg",
     "featured": false,
     "description": "Vintage-style band graphic, faded wash."
-  },
-  {
-    "id": 8,
-    "name": "Test",
-    "category": "Outerwear",
-    "price": 1,
-    "size": "L",
-    "image": "images/placeholder.svg",
-    "featured": false,
-    "description": "Navy puffer vest. Excellent condition, barely worn."
   }
 ];
