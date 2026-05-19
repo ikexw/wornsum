@@ -6,9 +6,9 @@
 const products = [
   {
     "id": 6,
-    "name": "Slim Chinos",
+    "name": "Test",
     "category": "Bottoms",
-    "price": 40,
+    "price": 1,
     "size": "30W",
     "image": "images/placeholder.svg",
     "featured": false,
