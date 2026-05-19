@@ -16,9 +16,9 @@ const products = [
   },
   {
     "id": 7,
-    "name": "Graphic Band Tee",
+    "name": "Test",
     "category": "Tops",
-    "price": 28,
+    "price": 1,
     "size": "M",
     "image": "images/placeholder.svg",
     "featured": false,
