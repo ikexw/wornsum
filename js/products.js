@@ -5,16 +5,6 @@
 
 const products = [
   {
-    "id": 6,
-    "name": "Test",
-    "category": "Bottoms",
-    "price": 1,
-    "size": "30W",
-    "image": "images/placeholder.svg",
-    "featured": false,
-    "description": "Olive slim-fit chinos. Light wear, great condition."
-  },
-  {
     "id": 7,
     "name": "Test",
     "category": "Tops",
