@@ -10,17 +10,6 @@ const dropTime = null;
 
 const products = [
   {
-    "id": 3,
-    "name": "Oversized Flannel Shirt",
-    "category": "Tops",
-    "price": 35,
-    "size": "L",
-    "image": "images/placeholder.svg",
-    "featured": true,
-    "description": "Soft red plaid flannel, slightly oversized cut.",
-    "published": true
-  },
-  {
     "id": 4,
     "name": "Canvas Tote Bag",
     "category": "Accessories",
