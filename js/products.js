@@ -10,17 +10,6 @@ const dropTime = null;
 
 const products = [
   {
-    "id": 7,
-    "name": "Graphic Band Tee",
-    "category": "Tops",
-    "price": 28,
-    "size": "M",
-    "image": "images/placeholder.svg",
-    "featured": false,
-    "description": "Vintage-style band graphic, faded wash.",
-    "published": true
-  },
-  {
     "id": 8,
     "name": "Insulated Puffer Vest",
     "category": "Outerwear",
