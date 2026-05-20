@@ -6,7 +6,7 @@
 //  published: true = visible to customers, false = permanent draft.
 // ============================================================
 
-const dropTime = null;
+const dropTime = "2026-05-22T20:00:00.000Z";
 
 const products = [
   {
