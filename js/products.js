@@ -23,6 +23,6 @@ const products = [
     ],
     "featured": true,
     "description": "Original 1990s Russell hoodie with the perfect vintage fit and slight cropped feel. Soft heavyweight fabric with a naturally worn-in look that makes it an easy spring/summer layering piece. Timeless colorway with classic fade and character you can’t really replicate on modern blanks.  \n\nPlease note: all items are vintage and may show signs of wear including fading, distressing, or minor imperfections. Refer to measurements for the most accurate fit.",
-    "published": true
+    "published": false
   }
 ];
