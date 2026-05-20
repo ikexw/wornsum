@@ -10,17 +10,6 @@ const dropTime = null;
 
 const products = [
   {
-    "id": 6,
-    "name": "Slim Chinos",
-    "category": "Bottoms",
-    "price": 40,
-    "size": "30W",
-    "image": "images/placeholder.svg",
-    "featured": false,
-    "description": "Olive slim-fit chinos. Light wear, great condition.",
-    "published": true
-  },
-  {
     "id": 7,
     "name": "Graphic Band Tee",
     "category": "Tops",
