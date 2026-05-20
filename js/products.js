@@ -10,17 +10,6 @@ const dropTime = null;
 
 const products = [
   {
-    "id": 2,
-    "name": "Y2K Cargo Pants",
-    "category": "Bottoms",
-    "price": 55,
-    "size": "32W",
-    "image": "images/placeholder.svg",
-    "featured": true,
-    "description": "Wide-leg cargo in tan. Multi-pocket, relaxed fit.",
-    "published": true
-  },
-  {
     "id": 3,
     "name": "Oversized Flannel Shirt",
     "category": "Tops",
