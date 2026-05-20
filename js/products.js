@@ -8,16 +8,4 @@
 
 const dropTime = null;
 
-const products = [
-  {
-    "id": 8,
-    "name": "Insulated Puffer Vest",
-    "category": "Outerwear",
-    "price": 62,
-    "size": "L",
-    "image": "images/placeholder.svg",
-    "featured": false,
-    "description": "Navy puffer vest. Excellent condition, barely worn.",
-    "published": true
-  }
-];
+const products = [];
