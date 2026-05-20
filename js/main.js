@@ -1,6 +1,14 @@
 // ── Cloudflare Worker URL ─────────────────────────────────────
-// Replace with your actual Worker URL after deploying (see setup instructions).
 const WORKER_URL = 'https://wornsum-checkout.wornsum.workers.dev';
+
+// ── Drop schedule ─────────────────────────────────────────────
+// dropTime is declared in products.js (loaded before this file)
+const DROP_TIME    = (typeof dropTime !== 'undefined' && dropTime) ? new Date(dropTime) : null;
+const DROP_IS_LIVE = !DROP_TIME || Date.now() >= DROP_TIME.getTime();
+
+function getPublishedProducts() {
+  return products.filter(p => p.published !== false);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
@@ -8,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setActiveNavLink();
 
   if (document.getElementById('featured-grid'))  renderFeaturedProducts();
-  if (document.getElementById('product-grid'))   { renderAllProducts(products); initFilters(); }
+  if (document.getElementById('product-grid'))   initShopPage();
   if (document.getElementById('cart-items'))     renderCartPage();
   if (document.getElementById('contact-form'))   initContactForm();
   if (document.getElementById('order-number'))   initSuccessPage();
@@ -91,8 +99,54 @@ function createProductCard(product) {
 
 // ── Home: featured products ───────────────────────────────────
 function renderFeaturedProducts() {
+  if (!DROP_IS_LIVE) return;
   const grid = document.getElementById('featured-grid');
-  products.filter(p => p.featured).forEach(p => grid.appendChild(createProductCard(p)));
+  getPublishedProducts().filter(p => p.featured).forEach(p => grid.appendChild(createProductCard(p)));
+}
+
+// ── Shop: init (checks drop schedule before rendering) ────────
+function initShopPage() {
+  if (!DROP_IS_LIVE) {
+    showDropCountdown(DROP_TIME);
+    return;
+  }
+  renderAllProducts(getPublishedProducts());
+  initFilters();
+}
+
+// ── Shop: countdown timer ────────────────────────────────────
+function showDropCountdown(dropDate) {
+  const filterBar = document.querySelector('.filter-bar');
+  if (filterBar) filterBar.style.display = 'none';
+
+  const dateStr = dropDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', hour:'numeric', minute:'2-digit' });
+
+  const target = document.getElementById('drop-countdown') || document.getElementById('product-grid');
+  target.style.display = '';
+  target.innerHTML = `
+    <div class="drop-countdown-wrap">
+      <p class="drop-eyebrow">Upcoming Drop</p>
+      <h2 class="drop-headline">Something new is coming.</h2>
+      <p class="drop-subtext">New pieces drop ${dateStr}.</p>
+      <div class="countdown-grid">
+        <div class="countdown-block"><div class="countdown-num" id="cd-days">00</div><div class="countdown-lbl">Days</div></div>
+        <div class="countdown-block"><div class="countdown-num" id="cd-hours">00</div><div class="countdown-lbl">Hrs</div></div>
+        <div class="countdown-block"><div class="countdown-num" id="cd-mins">00</div><div class="countdown-lbl">Min</div></div>
+        <div class="countdown-block"><div class="countdown-num" id="cd-secs">00</div><div class="countdown-lbl">Sec</div></div>
+      </div>
+    </div>`;
+
+  const fmt = n => String(n).padStart(2, '0');
+  function tick() {
+    const rem = dropDate.getTime() - Date.now();
+    if (rem <= 0) { location.reload(); return; }
+    document.getElementById('cd-days').textContent  = fmt(Math.floor(rem / 86400000));
+    document.getElementById('cd-hours').textContent = fmt(Math.floor((rem % 86400000) / 3600000));
+    document.getElementById('cd-mins').textContent  = fmt(Math.floor((rem % 3600000) / 60000));
+    document.getElementById('cd-secs').textContent  = fmt(Math.floor((rem % 60000) / 1000));
+  }
+  tick();
+  setInterval(tick, 1000);
 }
 
 // ── Shop: all products (filtered) ────────────────────────────
@@ -108,12 +162,13 @@ function renderAllProducts(list) {
 
 // ── Shop: category filter buttons ────────────────────────────
 function initFilters() {
+  const pub = getPublishedProducts();
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const cat = btn.dataset.filter;
-      renderAllProducts(cat === 'all' ? products : products.filter(p => p.category === cat));
+      renderAllProducts(cat === 'all' ? pub : pub.filter(p => p.category === cat));
     });
   });
 }

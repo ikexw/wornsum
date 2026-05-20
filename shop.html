@@ -9,6 +9,45 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css?v=3" />
+  <style>
+    /* ── Drop countdown ─────────────────────────────────── */
+    #drop-countdown { grid-column: 1 / -1; }
+    .drop-countdown-wrap {
+      text-align: center;
+      padding: 72px 20px 80px;
+    }
+    .drop-eyebrow {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--red); margin-bottom: 16px;
+    }
+    .drop-headline {
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      font-weight: 800; color: var(--navy); margin-bottom: 10px;
+    }
+    .drop-subtext { color: var(--muted); font-size: 0.95rem; margin-bottom: 48px; line-height: 1.6; }
+    .countdown-grid {
+      display: inline-flex;
+      background: var(--navy); border-radius: 12px; overflow: hidden;
+      box-shadow: 0 8px 32px rgba(13,31,60,.22);
+    }
+    .countdown-block {
+      padding: 28px 24px; text-align: center;
+      border-right: 1px solid rgba(255,255,255,.1);
+      min-width: 76px;
+    }
+    .countdown-block:last-child { border-right: none; }
+    .countdown-num {
+      font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 800; color: white;
+      line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.02em;
+    }
+    .countdown-lbl {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: rgba(255,255,255,.45); margin-top: 8px;
+    }
+    @media (max-width: 480px) {
+      .countdown-block { padding: 20px 14px; min-width: 60px; }
+    }
+  </style>
 </head>
 <body>
 
@@ -74,6 +113,9 @@
           <button class="filter-btn" data-filter="Outerwear">Outerwear</button>
           <button class="filter-btn" data-filter="Accessories">Accessories</button>
         </div>
+
+        <!-- Drop countdown (shown by main.js when drop is scheduled) -->
+        <div id="drop-countdown" style="display:none;"></div>
 
         <!-- Grid populated by main.js -->
         <div class="product-grid" id="product-grid"></div>

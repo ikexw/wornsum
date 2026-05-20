@@ -398,6 +398,49 @@
       .desktop-add-btn { display: none !important; }
     }
 
+    /* ── Drop schedule card ──────────────────────────────── */
+    .drop-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--navy);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 28px;
+    }
+    .drop-card-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 12px; margin-bottom: 14px;
+    }
+    .drop-card-lbl  { font-size: 0.72rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+    .drop-card-stat { font-size: 0.9rem; font-weight: 600; color: var(--navy); }
+    .drop-badge {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; padding: 4px 10px; border-radius: 100px; white-space: nowrap; flex-shrink: 0;
+    }
+    .drop-badge-live  { background: #dcfce7; color: #15803d; }
+    .drop-badge-sched { background: #fef3c7; color: #b45309; }
+    .drop-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .drop-dt-input {
+      padding: 9px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font-family: var(--font); font-size: 0.875rem; color: var(--text); background: var(--white);
+      outline: none; flex: 1; min-width: 190px; transition: border-color var(--ease);
+    }
+    .drop-dt-input:focus { border-color: var(--navy); }
+    .drop-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .btn-green { background: #16a34a; color: white; border-color: #16a34a; }
+    .btn-green:hover { background: #15803d; border-color: #15803d; }
+
+    /* ── Product status chips ────────────────────────────── */
+    .status-chip {
+      position: absolute; top: 10px; right: 10px;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 100px; cursor: pointer;
+      transition: opacity 0.15s ease; user-select: none;
+    }
+    .status-chip:hover { opacity: 0.75; }
+    .chip-live  { background: #dcfce7; color: #15803d; }
+    .chip-draft { background: rgba(245,241,235,.96); color: #6B7280; border: 1px solid #DDD6C8; }
+
     /* ── Responsive ──────────────────────────────────────── */
     @media (max-width: 480px) {
       .setup-card { padding: 28px 20px; }
@@ -518,6 +561,26 @@
 
   <!-- Page body -->
   <div class="admin-page">
+
+    <!-- Drop schedule card -->
+    <div class="drop-card">
+      <div class="drop-card-top">
+        <div>
+          <div class="drop-card-lbl">Drop Schedule</div>
+          <div class="drop-card-stat" id="drop-card-stat">Catalog is live</div>
+        </div>
+        <span class="drop-badge drop-badge-live" id="drop-badge">● Live</span>
+      </div>
+      <div class="drop-controls">
+        <input type="datetime-local" class="drop-dt-input" id="drop-dt-input" />
+        <button class="btn btn-primary btn-sm" onclick="scheduleDropTime()">Schedule Drop</button>
+      </div>
+      <div class="drop-actions">
+        <button class="btn btn-green btn-sm" onclick="goLiveNow()">Go Live Now</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearDropTime()" id="clear-drop-btn" style="display:none;">Clear Schedule</button>
+      </div>
+    </div>
+
     <div class="section-hd">
       <div>
         <div class="section-title">Products</div>
@@ -625,6 +688,19 @@
         </div>
       </div>
 
+      <div class="form-group">
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Published</div>
+            <div class="toggle-desc">Visible to customers (respects drop schedule above)</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="f-published" checked />
+            <span class="switch-track"></span>
+          </label>
+        </div>
+      </div>
+
     </div>
 
     <div class="modal-footer">
@@ -645,11 +721,13 @@ const OWNER = 'ikexw';
 const REPO  = 'wornsum';
 const API   = 'https://api.github.com';
 
+
 // ── State ─────────────────────────────────────────────────
-let allProducts   = [];
-let productsSha   = null;   // GitHub SHA of products.js (needed for PUT)
-let editingId     = null;   // null = adding, number = editing
-let pendingImage  = null;   // { base64, filename, mimeType } or null
+let allProducts    = [];
+let productsSha    = null;
+let currentDropTime = null;   // ISO string or null
+let editingId      = null;
+let pendingImage   = null;
 let confirmCallback = null;
 
 // ── Token management ──────────────────────────────────────
@@ -756,6 +834,11 @@ async function loadProducts() {
     const match   = source.match(/const products\s*=\s*(\[[\s\S]*?\]);/);
     if (!match) throw new Error('Could not parse products.js — unexpected format.');
     allProducts   = new Function('return ' + match[1])();
+
+    const dtMatch = source.match(/const dropTime\s*=\s*([^;]+);/);
+    try { currentDropTime = dtMatch ? new Function('return ' + dtMatch[1])() : null; } catch { currentDropTime = null; }
+
+    renderDropSchedule();
     renderGrid();
   } catch (e) {
     toast(e.message, 'error');
@@ -789,6 +872,7 @@ function renderGrid() {
   }
 
   allProducts.forEach(p => {
+    const isLive = p.published !== false;
     const card = document.createElement('div');
     card.className = 'admin-card';
     card.innerHTML = `
@@ -796,6 +880,11 @@ function renderGrid() {
         <img src="${p.image}" alt="${p.name}"
              onerror="this.src='images/placeholder.svg'">
         ${p.featured ? '<span class="featured-chip">Featured</span>' : ''}
+        <span class="status-chip ${isLive ? 'chip-live' : 'chip-draft'}"
+              onclick="togglePublished(${p.id})"
+              title="${isLive ? 'Click to set as draft' : 'Click to publish'}">
+          ${isLive ? '● Live' : '○ Draft'}
+        </span>
       </div>
       <div class="admin-card-body">
         <div class="admin-card-name">${p.name}</div>
@@ -835,7 +924,8 @@ function openAddModal() {
   document.getElementById('f-size').value        = '';
   document.getElementById('f-category').value    = 'Tops';
   document.getElementById('f-description').value = '';
-  document.getElementById('f-featured').checked  = false;
+  document.getElementById('f-featured').checked   = false;
+  document.getElementById('f-published').checked  = true;
   resetImageUpload();
   openModal();
 }
@@ -853,7 +943,8 @@ function openEditModal(id) {
   document.getElementById('f-size').value        = p.size;
   document.getElementById('f-category').value    = p.category;
   document.getElementById('f-description').value = p.description || '';
-  document.getElementById('f-featured').checked  = !!p.featured;
+  document.getElementById('f-featured').checked   = !!p.featured;
+  document.getElementById('f-published').checked  = p.published !== false;
 
   // Show existing image
   if (p.image && p.image !== 'images/placeholder.svg') {
@@ -934,6 +1025,7 @@ async function saveProduct() {
   const cat   = document.getElementById('f-category').value;
   const desc  = document.getElementById('f-description').value.trim();
   const feat  = document.getElementById('f-featured').checked;
+  const pub   = document.getElementById('f-published').checked;
 
   if (!name)        { toast('Product name is required.', 'error'); return; }
   if (!price || isNaN(price)) { toast('Please enter a valid price.', 'error'); return; }
@@ -968,11 +1060,11 @@ async function saveProduct() {
     if (editingId !== null) {
       // Update existing product
       const idx = allProducts.findIndex(p => p.id === editingId);
-      allProducts[idx] = { id: editingId, name, category: cat, price, size, image: imagePath, featured: feat, description: desc };
+      allProducts[idx] = { id: editingId, name, category: cat, price, size, image: imagePath, featured: feat, description: desc, published: pub };
     } else {
       // Add new product
       const newId = allProducts.length > 0 ? Math.max(...allProducts.map(p => p.id)) + 1 : 1;
-      allProducts.push({ id: newId, name, category: cat, price, size, image: imagePath, featured: feat, description: desc });
+      allProducts.push({ id: newId, name, category: cat, price, size, image: imagePath, featured: feat, description: desc, published: pub });
     }
 
     // Commit updated products.js
@@ -1027,13 +1119,91 @@ async function deleteProduct(id) {
 
 // ── Build products.js source ──────────────────────────────
 function buildProductsJs(products) {
+  const dropStr = currentDropTime ? JSON.stringify(currentDropTime) : 'null';
   return `// ============================================================
 //  PRODUCTS  —  managed via Wornsum Admin (admin.html)
 //  You can also edit this file directly.
+//
+//  dropTime: ISO string for a scheduled drop, or null (catalog always live).
+//  published: true = visible to customers, false = permanent draft.
 // ============================================================
+
+const dropTime = ${dropStr};
 
 const products = ${JSON.stringify(products, null, 2)};
 `;
+}
+
+// ── Drop schedule ─────────────────────────────────────────
+function renderDropSchedule() {
+  const statEl   = document.getElementById('drop-card-stat');
+  const badgeEl  = document.getElementById('drop-badge');
+  const clearBtn = document.getElementById('clear-drop-btn');
+
+  if (currentDropTime) {
+    const dt = new Date(currentDropTime);
+    const now = new Date();
+    const fmt = dt.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+    if (dt > now) {
+      statEl.textContent   = `Drops ${fmt}`;
+      badgeEl.textContent  = '● Scheduled';
+      badgeEl.className    = 'drop-badge drop-badge-sched';
+    } else {
+      statEl.textContent   = `Dropped ${fmt} — catalog live`;
+      badgeEl.textContent  = '● Live';
+      badgeEl.className    = 'drop-badge drop-badge-live';
+    }
+    clearBtn.style.display = '';
+  } else {
+    statEl.textContent   = 'Catalog is live';
+    badgeEl.textContent  = '● Live';
+    badgeEl.className    = 'drop-badge drop-badge-live';
+    clearBtn.style.display = 'none';
+  }
+}
+
+async function scheduleDropTime() {
+  const val = document.getElementById('drop-dt-input').value;
+  if (!val) { toast('Pick a date and time first.', 'error'); return; }
+  const dt = new Date(val);
+  if (dt <= new Date()) { toast('Drop time must be in the future.', 'error'); return; }
+  currentDropTime = dt.toISOString();
+  await saveProductsFile(`Schedule drop: ${dt.toLocaleDateString()}`);
+}
+
+async function clearDropTime() {
+  currentDropTime = null;
+  await saveProductsFile('Clear drop schedule');
+}
+
+async function goLiveNow() {
+  currentDropTime = null;
+  allProducts = allProducts.map(p => ({ ...p, published: true }));
+  await saveProductsFile('Go live now — publish all products');
+}
+
+async function togglePublished(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  p.published = p.published === false;  // false → true, true → false
+  try {
+    await saveProductsFile(`${p.published ? 'Publish' : 'Draft'}: ${p.name}`);
+  } catch {
+    p.published = !p.published; // revert on error
+  }
+}
+
+async function saveProductsFile(message) {
+  try {
+    const result = await putFile('js/products.js', buildProductsJs(allProducts), productsSha, message);
+    productsSha  = result.content.sha;
+    renderDropSchedule();
+    renderGrid();
+    showSaveStatus();
+    toast('Saved!', 'success');
+  } catch (e) {
+    toast(e.message, 'error');
+  }
 }
 
 // ── Save status indicator ─────────────────────────────────
