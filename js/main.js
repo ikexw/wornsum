@@ -52,14 +52,24 @@ function setActiveNavLink() {
 
 // ── Build a product card DOM element ─────────────────────────
 function createProductCard(product) {
+  const imgs = (product.images && product.images.length)
+    ? product.images
+    : [product.image || 'images/placeholder.svg'];
+  const multi = imgs.length > 1;
+
   const card = document.createElement('article');
   card.className = 'product-card';
   card.dataset.category = product.category;
 
   card.innerHTML = `
     <div class="card-image">
-      <img src="${product.image}" alt="${product.name}" loading="lazy"
+      <img src="${imgs[0]}" alt="${product.name}" loading="lazy"
            onerror="this.src='images/placeholder.svg'">
+      ${multi ? `
+        <button class="img-nav img-nav-prev" aria-label="Previous photo">&#8249;</button>
+        <button class="img-nav img-nav-next" aria-label="Next photo">&#8250;</button>
+        <div class="img-dots">${imgs.map((_, i) => `<span class="img-dot${i===0?' active':''}"></span>`).join('')}</div>
+      ` : ''}
     </div>
     <div class="card-body">
       <div class="card-meta">
@@ -75,6 +85,19 @@ function createProductCard(product) {
       </div>
     </div>
   `;
+
+  if (multi) {
+    let cur = 0;
+    const imgEl  = card.querySelector('.card-image img');
+    const dots   = card.querySelectorAll('.img-dot');
+    const goTo   = (n) => {
+      cur = (n + imgs.length) % imgs.length;
+      imgEl.src = imgs[cur];
+      dots.forEach((d, i) => d.classList.toggle('active', i === cur));
+    };
+    card.querySelector('.img-nav-prev').addEventListener('click', (e) => { e.stopPropagation(); goTo(cur - 1); });
+    card.querySelector('.img-nav-next').addEventListener('click', (e) => { e.stopPropagation(); goTo(cur + 1); });
+  }
 
   card.querySelector('.add-to-cart').addEventListener('click', (e) => {
     const btn = e.currentTarget;

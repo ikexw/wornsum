@@ -310,35 +310,40 @@
       .modal-footer { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
     }
 
-    /* ── Image upload area ───────────────────────────────── */
-    .image-upload-area {
-      border: 2px dashed var(--border); border-radius: var(--radius);
-      background: var(--bg); cursor: pointer; overflow: hidden;
-      transition: border-color var(--ease), background var(--ease);
-      margin-bottom: 20px; position: relative;
+    /* ── Multi-image grid ────────────────────────────────── */
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 8px; margin-bottom: 20px;
     }
-    .image-upload-area:hover,
-    .image-upload-area.drag-over { border-color: var(--navy); background: var(--cream); }
-    .image-upload-area input[type="file"] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    .img-thumb {
+      aspect-ratio: 1; border-radius: var(--radius-sm);
+      overflow: hidden; position: relative; background: var(--cream);
     }
-    .upload-prompt {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 36px 24px; gap: 10px; pointer-events: none;
+    .img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb-cover {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(13,31,60,.72); color: white;
+      font-size: 0.55rem; font-weight: 700; text-align: center;
+      padding: 3px; text-transform: uppercase; letter-spacing: .06em;
     }
-    .upload-icon { color: var(--muted); }
-    .upload-prompt p { font-size: 0.875rem; font-weight: 600; color: var(--muted); }
-    .upload-prompt span { font-size: 0.75rem; color: var(--border); }
-    #image-preview-wrap {
-      display: none; aspect-ratio: 1; position: relative;
+    .thumb-remove {
+      position: absolute; top: 4px; right: 4px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(200,16,46,.85); color: white;
+      font-size: 1rem; line-height: 20px; text-align: center;
+      cursor: pointer; border: none; font-family: var(--font);
     }
-    #image-preview-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    .preview-change-btn {
-      position: absolute; bottom: 10px; right: 10px;
-      background: rgba(13,31,60,.75); color: white;
-      font-size: 0.75rem; font-weight: 600; padding: 6px 12px;
-      border-radius: var(--radius-sm); pointer-events: none;
+    .image-add-tile {
+      aspect-ratio: 1; border: 2px dashed var(--border); border-radius: var(--radius-sm);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 5px; cursor: pointer; position: relative;
+      background: var(--bg); transition: border-color var(--ease), background var(--ease);
     }
+    .image-add-tile:hover { border-color: var(--navy); background: var(--cream); }
+    .image-add-tile input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .image-add-tile svg { color: var(--muted); }
+    .image-add-tile span { font-size: 0.7rem; font-weight: 600; color: var(--muted); }
 
     /* ── Delete confirm modal ────────────────────────────── */
     .confirm-overlay {
@@ -626,22 +631,11 @@
 
     <div class="modal-body">
 
-      <!-- Image upload -->
-      <div class="image-upload-area" id="image-upload-area">
-        <input type="file" id="image-input" accept="image/*" />
-        <div class="upload-prompt" id="upload-prompt">
-          <svg class="upload-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
-          </svg>
-          <p>Tap to upload photo</p>
-          <span>JPG, PNG, HEIC — iPhone photos welcome</span>
-        </div>
-        <div id="image-preview-wrap">
-          <img id="image-preview" src="" alt="Product preview" />
-          <span class="preview-change-btn">Change photo</span>
-        </div>
+      <!-- Multi-image upload grid -->
+      <div class="image-grid" id="image-grid">
+        <!-- thumbnails + add tile rendered by renderImageGrid() -->
       </div>
+      <input type="file" id="image-input" accept="image/*" multiple style="display:none;" />
 
       <!-- Product fields -->
       <div class="form-group">
@@ -725,9 +719,10 @@ const API   = 'https://api.github.com';
 // ── State ─────────────────────────────────────────────────
 let allProducts    = [];
 let productsSha    = null;
-let currentDropTime = null;   // ISO string or null
+let currentDropTime = null;
 let editingId      = null;
-let pendingImage   = null;
+let existingImages = [];   // paths already on GitHub
+let pendingImages  = [];   // { base64, filename } awaiting upload
 let confirmCallback = null;
 
 // ── Token management ──────────────────────────────────────
@@ -926,7 +921,8 @@ function openAddModal() {
   document.getElementById('f-description').value = '';
   document.getElementById('f-featured').checked   = false;
   document.getElementById('f-published').checked  = true;
-  resetImageUpload();
+  existingImages = []; pendingImages = [];
+  renderImageGrid();
   openModal();
 }
 
@@ -946,12 +942,11 @@ function openEditModal(id) {
   document.getElementById('f-featured').checked   = !!p.featured;
   document.getElementById('f-published').checked  = p.published !== false;
 
-  // Show existing image
-  if (p.image && p.image !== 'images/placeholder.svg') {
-    showImagePreview(p.image);
-  } else {
-    resetImageUpload();
-  }
+  // Load existing images
+  existingImages = p.images && p.images.length ? [...p.images]
+                 : (p.image && p.image !== 'images/placeholder.svg' ? [p.image] : []);
+  pendingImages  = [];
+  renderImageGrid();
   openModal();
 }
 
@@ -971,33 +966,59 @@ document.getElementById('product-modal').addEventListener('click', (e) => {
   if (e.target === e.currentTarget) closeModal();
 });
 
-// ── Image upload handling ─────────────────────────────────
-document.getElementById('image-input').addEventListener('change', handleImageSelect);
-
-const uploadArea = document.getElementById('image-upload-area');
-uploadArea.addEventListener('dragover',  (e) => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
-uploadArea.addEventListener('dragleave', ()  => uploadArea.classList.remove('drag-over'));
-uploadArea.addEventListener('drop',      (e) => {
-  e.preventDefault();
-  uploadArea.classList.remove('drag-over');
-  if (e.dataTransfer.files[0]) processImageFile(e.dataTransfer.files[0]);
+// ── Multi-image handling ──────────────────────────────────
+document.getElementById('image-input').addEventListener('change', (e) => {
+  [...e.target.files].forEach(addImageFile);
+  e.target.value = '';
 });
 
-function handleImageSelect(e) {
-  const file = e.target.files[0];
-  if (file) processImageFile(file);
+function renderImageGrid() {
+  const grid = document.getElementById('image-grid');
+  grid.innerHTML = '';
+
+  const allImgs = [
+    ...existingImages.map(src => ({ src, isPending: false })),
+    ...pendingImages.map(pi => ({ src: pi.dataUrl, isPending: true })),
+  ];
+
+  allImgs.forEach(({ src }, i) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'img-thumb';
+    thumb.innerHTML = `
+      <img src="${src}" onerror="this.src='images/placeholder.svg'" />
+      ${i === 0 ? '<span class="thumb-cover">Cover</span>' : ''}
+      <button class="thumb-remove" onclick="removeImage(${i})" type="button">×</button>`;
+    grid.appendChild(thumb);
+  });
+
+  // "Add Photo" tile
+  const tile = document.createElement('div');
+  tile.className = 'image-add-tile';
+  tile.innerHTML = `
+    <input type="file" accept="image/*" multiple onchange="[...this.files].forEach(addImageFile);this.value='';" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    <span>${allImgs.length === 0 ? 'Add Photos' : 'Add More'}</span>`;
+  grid.appendChild(tile);
 }
 
-function processImageFile(file) {
+function removeImage(index) {
+  if (index < existingImages.length) {
+    existingImages.splice(index, 1);
+  } else {
+    pendingImages.splice(index - existingImages.length, 1);
+  }
+  renderImageGrid();
+}
+
+function addImageFile(file) {
   if (file.size > 50 * 1024 * 1024) { toast('Image must be under 50MB.', 'error'); return; }
-
-  const filename = `product-${Date.now()}.jpg`;
-
+  const filename = `product-${Date.now()}-${Math.random().toString(36).slice(2,5)}.jpg`;
   const reader = new FileReader();
   reader.onload = (e) => {
     const img = new Image();
     img.onload = () => {
-      // Resize to max 1400px on longest side, export as JPEG 88% quality
       const MAX = 1400;
       let { width: w, height: h } = img;
       if (w > MAX || h > MAX) {
@@ -1008,26 +1029,12 @@ function processImageFile(file) {
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-      const base64  = dataUrl.split(',')[1];
-      pendingImage  = { base64, filename, mimeType: 'image/jpeg' };
-      showImagePreview(dataUrl);
+      pendingImages.push({ base64: dataUrl.split(',')[1], filename, dataUrl });
+      renderImageGrid();
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
-}
-
-function showImagePreview(src) {
-  document.getElementById('upload-prompt').style.display   = 'none';
-  document.getElementById('image-preview-wrap').style.display = 'block';
-  document.getElementById('image-preview').src = src;
-}
-
-function resetImageUpload() {
-  document.getElementById('upload-prompt').style.display      = 'flex';
-  document.getElementById('image-preview-wrap').style.display = 'none';
-  document.getElementById('image-preview').src = '';
-  document.getElementById('image-input').value = '';
 }
 
 // ── Save product ──────────────────────────────────────────
@@ -1049,35 +1056,26 @@ async function saveProduct() {
   btn.textContent = 'Saving…';
 
   try {
-    let imagePath = 'images/placeholder.svg';
-
-    // Upload image if a new one was selected
-    if (pendingImage) {
-      const imgBody = { message: `Upload product image: ${pendingImage.filename}`, content: pendingImage.base64 };
-      // Check if file already exists (to get its SHA)
-      try {
-        const existing = await getFile(`images/${pendingImage.filename}`);
-        imgBody.sha = existing.sha;
-      } catch { /* new file, no SHA needed */ }
-
-      await fetch(`${API}/repos/${OWNER}/${REPO}/contents/images/${pendingImage.filename}`, {
-        method: 'PUT', headers: headers(), body: JSON.stringify(imgBody)
+    // Upload any new images
+    const uploaded = [];
+    for (const pi of pendingImages) {
+      const body = { message: `Upload: ${pi.filename}`, content: pi.base64 };
+      try { const ex = await getFile(`images/${pi.filename}`); body.sha = ex.sha; } catch {}
+      await fetch(`${API}/repos/${OWNER}/${REPO}/contents/images/${pi.filename}`, {
+        method: 'PUT', headers: headers(), body: JSON.stringify(body)
       });
-      imagePath = `images/${pendingImage.filename}`;
-    } else if (editingId !== null) {
-      // Keep existing image
-      const existing = allProducts.find(p => p.id === editingId);
-      if (existing) imagePath = existing.image;
+      uploaded.push(`images/${pi.filename}`);
     }
 
+    const images   = [...existingImages, ...uploaded];
+    const imagePath = images[0] || 'images/placeholder.svg'; // primary image (backward compat)
+
     if (editingId !== null) {
-      // Update existing product
       const idx = allProducts.findIndex(p => p.id === editingId);
-      allProducts[idx] = { id: editingId, name, category: cat, price, size, image: imagePath, featured: feat, description: desc, published: pub };
+      allProducts[idx] = { id: editingId, name, category: cat, price, size, image: imagePath, images, featured: feat, description: desc, published: pub };
     } else {
-      // Add new product
       const newId = allProducts.length > 0 ? Math.max(...allProducts.map(p => p.id)) + 1 : 1;
-      allProducts.push({ id: newId, name, category: cat, price, size, image: imagePath, featured: feat, description: desc, published: pub });
+      allProducts.push({ id: newId, name, category: cat, price, size, image: imagePath, images, featured: feat, description: desc, published: pub });
     }
 
     // Commit updated products.js
