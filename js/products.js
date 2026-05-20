@@ -10,17 +10,6 @@ const dropTime = null;
 
 const products = [
   {
-    "id": 5,
-    "name": "Ribbed Wool Beanie",
-    "category": "Accessories",
-    "price": 18,
-    "size": "One Size",
-    "image": "images/placeholder.svg",
-    "featured": false,
-    "description": "Navy ribbed wool beanie. Classic, warm.",
-    "published": true
-  },
-  {
     "id": 6,
     "name": "Slim Chinos",
     "category": "Bottoms",
