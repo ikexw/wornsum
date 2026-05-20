@@ -10,17 +10,6 @@ const dropTime = null;
 
 const products = [
   {
-    "id": 1,
-    "name": "Vintage Levi's Trucker Jacket",
-    "category": "Outerwear",
-    "price": 85,
-    "size": "M",
-    "image": "images/placeholder.svg",
-    "featured": true,
-    "description": "Classic Levi's denim trucker, lightly faded. Excellent condition.",
-    "published": true
-  },
-  {
     "id": 2,
     "name": "Y2K Cargo Pants",
     "category": "Bottoms",
