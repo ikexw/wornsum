@@ -435,6 +435,24 @@
     .btn-green { background: #16a34a; color: white; border-color: #16a34a; }
     .btn-green:hover { background: #15803d; border-color: #15803d; }
 
+    /* ── Sold state ──────────────────────────────────────── */
+    .admin-sold-overlay {
+      position: absolute; inset: 0;
+      background: rgba(13,31,60,.32);
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    .admin-sold-stamp {
+      background: white; color: var(--navy);
+      font-size: 0.65rem; font-weight: 800; letter-spacing: .12em;
+      text-transform: uppercase; padding: 5px 12px; border-radius: 100px;
+      transform: rotate(-12deg);
+    }
+    .btn-sold     { background: #16a34a; color: white; border-color: #16a34a; }
+    .btn-sold:hover { background: #15803d; border-color: #15803d; }
+    .btn-avail    { background: transparent; color: var(--muted); border-color: var(--border); }
+    .btn-avail:hover { border-color: #16a34a; color: #16a34a; }
+
     /* ── Product status chips ────────────────────────────── */
     .status-chip {
       position: absolute; top: 10px; right: 10px;
@@ -875,6 +893,7 @@ function renderGrid() {
         <img src="${p.image}" alt="${p.name}"
              onerror="this.src='images/placeholder.svg'">
         ${p.featured ? '<span class="featured-chip">Featured</span>' : ''}
+        ${p.sold ? '<div class="admin-sold-overlay"><span class="admin-sold-stamp">Sold</span></div>' : ''}
         <span class="status-chip ${isLive ? 'chip-live' : 'chip-draft'}"
               onclick="togglePublished(${p.id})"
               title="${isLive ? 'Click to set as draft' : 'Click to publish'}">
@@ -895,6 +914,13 @@ function renderGrid() {
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
             <span>Edit</span>
+          </button>
+          <button class="btn ${p.sold ? 'btn-sold' : 'btn-avail'} btn-sm" onclick="toggleSold(${p.id})" style="flex:1;"
+                  title="${p.sold ? 'Mark as available again' : 'Mark as sold'}">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              ${p.sold ? '<polyline points="20 6 9 17 4 12"/>' : '<circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12"/>'}
+            </svg>
+            <span>${p.sold ? 'Sold' : 'Mark Sold'}</span>
           </button>
           <button class="btn btn-danger btn-sm" onclick="confirmDelete(${p.id})" style="flex:1;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1191,6 +1217,17 @@ async function goLiveNow() {
   currentDropTime = null;
   allProducts = allProducts.map(p => ({ ...p, published: true }));
   await saveProductsFile('Go live now — publish all products');
+}
+
+async function toggleSold(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  p.sold = !p.sold;
+  try {
+    await saveProductsFile(`${p.sold ? 'Mark sold' : 'Mark available'}: ${p.name}`);
+  } catch {
+    p.sold = !p.sold; // revert on error
+  }
 }
 
 async function togglePublished(id) {

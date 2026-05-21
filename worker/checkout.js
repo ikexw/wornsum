@@ -1,9 +1,11 @@
 // Cloudflare Worker — Wornsum payment backend
 // Endpoints:
-//   POST /checkout  → create Stripe Checkout Session, return { url }
-//   GET  /session?id=cs_xxx → return sanitized session details for success page
+//   POST /checkout        → create Stripe Checkout Session, return { url }
+//   GET  /session?id=...  → sanitized session details for success page
+//   POST /mark-sold       → verify payment then mark products sold in GitHub
 
 const STRIPE_API = 'https://api.stripe.com/v1';
+const GH_API     = 'https://api.github.com/repos/ikexw/wornsum/contents/js/products.js';
 
 const ALLOWED_ORIGINS = [
   'https://wornsum.com',
@@ -64,7 +66,6 @@ export default {
       params.append('success_url', 'https://wornsum.com/success.html?session_id={CHECKOUT_SESSION_ID}');
       params.append('cancel_url', 'https://wornsum.com/cart.html');
 
-      // Collect shipping address via Stripe
       const countries = ['US', 'CA', 'GB', 'AU', 'NZ', 'IE'];
       countries.forEach((c, i) =>
         params.append(`shipping_address_collection[allowed_countries][${i}]`, c)
@@ -127,6 +128,85 @@ export default {
         currency:     session.currency,
         note:         session.metadata?.note           || null,
       }, 200, cors);
+    }
+
+    // ── POST /mark-sold ────────────────────────────────────────
+    // Verifies Stripe payment then marks purchased products as sold in GitHub.
+    if (request.method === 'POST' && url.pathname === '/mark-sold') {
+      let body;
+      try { body = await request.json(); } catch {
+        return json({ error: 'Invalid JSON' }, 400, cors);
+      }
+
+      const { session_id, product_ids } = body;
+      if (!session_id || !Array.isArray(product_ids) || product_ids.length === 0) {
+        return json({ error: 'Missing session_id or product_ids' }, 400, cors);
+      }
+
+      // Verify payment with Stripe
+      const session = await stripeGet(env, `/checkout/sessions/${session_id}`);
+      if (session.error || session.payment_status !== 'paid') {
+        return json({ error: 'Payment not verified' }, 402, cors);
+      }
+
+      if (!env.GITHUB_TOKEN) {
+        return json({ error: 'GITHUB_TOKEN not configured on Worker' }, 500, cors);
+      }
+
+      const ghHeaders = {
+        Authorization: `token ${env.GITHUB_TOKEN}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      };
+
+      // Fetch current products.js
+      const fileRes = await fetch(GH_API, { headers: ghHeaders });
+      if (!fileRes.ok) return json({ error: 'Could not read products.js' }, 500, cors);
+      const file   = await fileRes.json();
+      const source = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))));
+
+      // Parse products array (content is JSON.stringify output so JSON.parse is safe)
+      const pMatch = source.match(/const products\s*=\s*(\[[\s\S]*?\]);/);
+      if (!pMatch) return json({ error: 'Could not parse products.js' }, 500, cors);
+      let products;
+      try { products = JSON.parse(pMatch[1]); } catch {
+        return json({ error: 'JSON parse failed' }, 500, cors);
+      }
+
+      // Mark matching products as sold
+      let changed = false;
+      products = products.map(p => {
+        if (product_ids.includes(p.id) && !p.sold) {
+          changed = true;
+          return { ...p, sold: true };
+        }
+        return p;
+      });
+      if (!changed) return json({ ok: true, changed: false }, 200, cors);
+
+      // Rebuild products.js (preserve dropTime)
+      const updatedSource = source.replace(
+        /const products\s*=\s*\[[\s\S]*?\];/,
+        `const products = ${JSON.stringify(products, null, 2)};`
+      );
+
+      const encoded = btoa(unescape(encodeURIComponent(updatedSource)));
+      const putRes  = await fetch(GH_API, {
+        method: 'PUT',
+        headers: ghHeaders,
+        body: JSON.stringify({
+          message: `Mark sold: order ${session_id.slice(0, 20)}`,
+          content: encoded,
+          sha: file.sha,
+        }),
+      });
+
+      if (!putRes.ok) {
+        const err = await putRes.json().catch(() => ({}));
+        return json({ error: err.message || 'GitHub write failed' }, 500, cors);
+      }
+
+      return json({ ok: true, changed: true }, 200, cors);
     }
 
     return new Response('Not found', { status: 404, headers: cors });

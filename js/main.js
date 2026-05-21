@@ -7,7 +7,10 @@ const DROP_TIME    = (typeof dropTime !== 'undefined' && dropTime) ? new Date(dr
 const DROP_IS_LIVE = !DROP_TIME || Date.now() >= DROP_TIME.getTime();
 
 function getPublishedProducts() {
-  return products.filter(p => p.published !== false);
+  // Published products sorted: available first, sold at bottom
+  return products
+    .filter(p => p.published !== false)
+    .sort((a, b) => (a.sold ? 1 : 0) - (b.sold ? 1 : 0));
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -65,6 +68,7 @@ function createProductCard(product) {
     <div class="card-image">
       <img src="${imgs[0]}" alt="${product.name}" loading="lazy"
            onerror="this.src='images/placeholder.svg'">
+      ${product.sold ? '<div class="sold-overlay"><span class="sold-stamp">Sold</span></div>' : ''}
       ${multi ? `
         <button class="img-nav img-nav-prev" aria-label="Previous photo">&#8249;</button>
         <button class="img-nav img-nav-next" aria-label="Next photo">&#8250;</button>
@@ -79,9 +83,10 @@ function createProductCard(product) {
       <h3 class="card-name">${product.name}</h3>
       <div class="card-footer">
         <span class="card-price">$${product.price}</span>
-        <button class="btn btn-primary btn-sm add-to-cart" data-id="${product.id}">
-          Add to Cart
-        </button>
+        ${product.sold
+          ? '<span class="btn btn-sm sold-tag">Sold</span>'
+          : `<button class="btn btn-primary btn-sm add-to-cart" data-id="${product.id}">Add to Cart</button>`
+        }
       </div>
     </div>
   `;
@@ -99,7 +104,9 @@ function createProductCard(product) {
     card.querySelector('.img-nav-next').addEventListener('click', (e) => { e.stopPropagation(); goTo(cur + 1); });
   }
 
-  card.querySelector('.add-to-cart').addEventListener('click', (e) => {
+  const addBtn = card.querySelector('.add-to-cart');
+  if (!addBtn) return card; // sold item — no cart button
+  addBtn.addEventListener('click', (e) => {
     const btn = e.currentTarget;
     addToCart(product.id);
 
@@ -359,6 +366,18 @@ async function initSuccessPage() {
   // Clear cart — Stripe only redirects here on successful payment
   clearCart();
   sessionStorage.removeItem('wornsum_checkout_cart');
+
+  // Auto-mark purchased items as sold
+  const productIds = snapshot.map(i => i.id);
+  if (productIds.length > 0 && !WORKER_URL.includes('YOUR_SUBDOMAIN')) {
+    try {
+      await fetch(`${WORKER_URL}/mark-sold`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ session_id: sessionId, product_ids: productIds }),
+      });
+    } catch { /* Silently fail — order confirmed, admin can mark manually */ }
+  }
 
   // Fetch session from Worker for email + note
   if (!WORKER_URL.includes('YOUR_SUBDOMAIN')) {
