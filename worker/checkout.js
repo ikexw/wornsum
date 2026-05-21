@@ -66,10 +66,21 @@ export default {
       params.append('success_url', 'https://wornsum.com/success.html?session_id={CHECKOUT_SESSION_ID}');
       params.append('cancel_url', 'https://wornsum.com/cart.html');
 
-      const countries = ['US', 'CA', 'GB', 'AU', 'NZ', 'IE'];
-      countries.forEach((c, i) =>
-        params.append(`shipping_address_collection[allowed_countries][${i}]`, c)
-      );
+      // Local pickup (free)
+      params.append('shipping_options[0][shipping_rate_data][type]', 'fixed_amount');
+      params.append('shipping_options[0][shipping_rate_data][display_name]', 'Local Pickup');
+      params.append('shipping_options[0][shipping_rate_data][fixed_amount][amount]', '0');
+      params.append('shipping_options[0][shipping_rate_data][fixed_amount][currency]', 'usd');
+
+      // Standard shipping ($5 flat)
+      params.append('shipping_options[1][shipping_rate_data][type]', 'fixed_amount');
+      params.append('shipping_options[1][shipping_rate_data][display_name]', 'Standard Shipping');
+      params.append('shipping_options[1][shipping_rate_data][fixed_amount][amount]', '500');
+      params.append('shipping_options[1][shipping_rate_data][fixed_amount][currency]', 'usd');
+      params.append('shipping_options[1][shipping_rate_data][delivery_estimate][minimum][unit]', 'business_day');
+      params.append('shipping_options[1][shipping_rate_data][delivery_estimate][minimum][value]', '3');
+      params.append('shipping_options[1][shipping_rate_data][delivery_estimate][maximum][unit]', 'business_day');
+      params.append('shipping_options[1][shipping_rate_data][delivery_estimate][maximum][value]', '7');
 
       if (note) params.append('metadata[note]', String(note).slice(0, 500));
 
