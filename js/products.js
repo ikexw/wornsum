@@ -2,9 +2,8 @@
 //  PRODUCTS  —  managed via Wornsum Admin (admin.html)
 //  You can also edit this file directly.
 //
-//  dropTime:  ISO string for a scheduled drop, or null (catalog always live).
+//  dropTime: ISO string for a scheduled drop, or null (catalog always live).
 //  published: true = visible to customers, false = permanent draft.
-//  sold:      true = sold out, listing stays visible but can't be purchased.
 // ============================================================
 
 const dropTime = "2026-05-22T20:00:00.000Z";
@@ -32,7 +31,7 @@ const products = [
     "name": "Vintage 90s Russell Red",
     "category": "Tops",
     "price": 40,
-    "size": "XL (23x26)",
+    "size": "L (23x26)",
     "image": "images/product-1779312595392-2f8.jpg",
     "images": [
       "images/product-1779312595392-2f8.jpg",
@@ -42,8 +41,7 @@ const products = [
     ],
     "featured": true,
     "description": "Original 1990s Russell hoodie with the perfect vintage fit and slight cropped feel. Soft heavyweight fabric with a naturally worn-in look that makes it an easy spring/summer layering piece. Timeless colorway with classic fade and character you can't really replicate on modern blanks.  \n\nPlease note: all items are vintage and may show signs of wear including fading, distressing, or minor imperfections. Refer to measurements for the most accurate fit.",
-    "published": true,
-    "sold": false
+    "published": true
   },
   {
     "id": 3,
