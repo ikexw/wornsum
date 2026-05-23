@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
   initMobileNav();
   setActiveNavLink();
+  initProductModal();
 
   if (document.getElementById('featured-grid'))  renderFeaturedProducts();
   if (document.getElementById('product-grid'))   initShopPage();
@@ -104,9 +105,14 @@ function createProductCard(product) {
     card.querySelector('.img-nav-next').addEventListener('click', (e) => { e.stopPropagation(); goTo(cur + 1); });
   }
 
+  card.addEventListener('click', (e) => {
+    if (!e.target.closest('button')) openProductModal(product);
+  });
+
   const addBtn = card.querySelector('.add-to-cart');
   if (!addBtn) return card; // sold item — no cart button
   addBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
     const btn = e.currentTarget;
     addToCart(product.id);
 
@@ -401,6 +407,92 @@ async function initSuccessPage() {
       // Silently ignore — order is confirmed, receipt is shown from sessionStorage
     }
   }
+}
+
+// ── Product detail modal ──────────────────────────────────────
+function initProductModal() {
+  const modal = document.createElement('div');
+  modal.id = 'product-modal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-container">
+      <button class="modal-close" aria-label="Close">&times;</button>
+      <div class="modal-images">
+        <img class="modal-main-img" src="" alt="">
+        <div class="modal-thumbs"></div>
+      </div>
+      <div class="modal-info">
+        <div class="modal-meta">
+          <span class="modal-category"></span>
+          <span class="modal-size"></span>
+        </div>
+        <h2 class="modal-name"></h2>
+        <p class="modal-price"></p>
+        <p class="modal-description"></p>
+        <div class="modal-actions"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelector('.modal-close').addEventListener('click', closeProductModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeProductModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeProductModal(); });
+}
+
+function openProductModal(product) {
+  const modal   = document.getElementById('product-modal');
+  const imgs    = (product.images && product.images.length) ? product.images : [product.image || 'images/placeholder.svg'];
+  const mainImg = modal.querySelector('.modal-main-img');
+  const thumbsEl = modal.querySelector('.modal-thumbs');
+
+  mainImg.src = imgs[0];
+  mainImg.alt = product.name;
+
+  thumbsEl.innerHTML = '';
+  if (imgs.length > 1) {
+    imgs.forEach((src, i) => {
+      const t = document.createElement('img');
+      t.src = src; t.className = 'modal-thumb' + (i === 0 ? ' active' : '');
+      t.addEventListener('click', () => {
+        mainImg.src = src;
+        thumbsEl.querySelectorAll('.modal-thumb').forEach((el, j) => el.classList.toggle('active', j === i));
+      });
+      thumbsEl.appendChild(t);
+    });
+  }
+
+  modal.querySelector('.modal-category').textContent  = product.category;
+  modal.querySelector('.modal-size').textContent       = 'Size ' + product.size;
+  modal.querySelector('.modal-name').textContent       = product.name;
+  modal.querySelector('.modal-price').textContent      = '$' + product.price;
+  modal.querySelector('.modal-description').textContent = product.description || '';
+
+  const actions = modal.querySelector('.modal-actions');
+  if (product.sold) {
+    actions.innerHTML = '<span class="btn sold-tag">Sold</span>';
+  } else {
+    actions.innerHTML = `<button class="btn btn-primary add-to-cart-modal" data-id="${product.id}">Add to Cart</button>`;
+    actions.querySelector('.add-to-cart-modal').addEventListener('click', () => {
+      addToCart(product.id);
+      const btn = actions.querySelector('.add-to-cart-modal');
+      btn.textContent = 'Added ✓'; btn.classList.add('added');
+      setTimeout(() => { btn.textContent = 'Add to Cart'; btn.classList.remove('added'); }, 1200);
+      const cartIcon = document.querySelector('.cart-icon-wrap');
+      if (cartIcon) {
+        cartIcon.classList.add('bounce');
+        cartIcon.addEventListener('animationend', () => cartIcon.classList.remove('bounce'), { once: true });
+      }
+    });
+  }
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProductModal() {
+  document.getElementById('product-modal').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 // ── Contact form submission via Formspree ─────────────────────
