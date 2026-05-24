@@ -60,5 +60,21 @@ const products = [
     "description": "Original 1990s Russell hoodie with the perfect vintage fit and slight cropped feel. Soft heavyweight fabric with a naturally worn-in look that makes it an easy spring/summer layering piece. Timeless colorway with classic fade and character you can't really replicate on modern blanks.  \n\nPlease note: all items are vintage and may show signs of wear including fading, distressing, or minor imperfections. Refer to measurements for the most accurate fit.",
     "published": true,
     "sold": true
+  },
+  {
+    "id": 4,
+    "name": "1994 Vintage Badgers Rosebowl Crewneck",
+    "category": "Tops",
+    "price": 35,
+    "size": "M/L 20x23",
+    "image": "images/product-1779648476045-4y3.jpg",
+    "images": [
+      "images/product-1779648476045-4y3.jpg",
+      "images/product-1779648481319-5se.jpg",
+      "images/product-1779648485579-7t6.jpg"
+    ],
+    "featured": true,
+    "description": "Original 1990s Wisconsin Badgers Rose Bowl crewnecks featuring classic collegiate graphics and the perfect vintage oversized fit. Heavyweight feel with naturally faded colors and worn-in character that gives each piece a true 90s look. Easy everyday layer with timeless sportswear styling.\n\nPlease note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
+    "published": true
   }
 ];
