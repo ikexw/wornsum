@@ -92,5 +92,21 @@ const products = [
     "featured": true,
     "description": "Original 1990s Wisconsin Badgers Rose Bowl crewnecks featuring classic collegiate graphics and the perfect vintage oversized fit. Heavyweight feel with naturally faded colors and worn-in character that gives each piece a true 90s look. Easy everyday layer with timeless sportswear styling.\n\nPlease note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
     "published": true
+  },
+  {
+    "id": 6,
+    "name": "2000 Vintage Badgers Rose Bowl Crewneck",
+    "category": "Tops",
+    "price": 35,
+    "size": "M/L (22x24)",
+    "image": "images/product-1779648705206-sib.jpg",
+    "images": [
+      "images/product-1779648705206-sib.jpg",
+      "images/product-1779648709049-5y8.jpg",
+      "images/product-1779648712838-3w1.jpg"
+    ],
+    "featured": true,
+    "description": "Original 1990s Wisconsin Badgers Rose Bowl crewnecks featuring classic collegiate graphics and the perfect vintage oversized fit. Heavyweight feel with naturally faded colors and worn-in character that gives each piece a true 90s look. Easy everyday layer with timeless sportswear styling.\n\nPlease note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
+    "published": true
   }
 ];
