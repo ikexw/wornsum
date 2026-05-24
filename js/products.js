@@ -66,7 +66,7 @@ const products = [
     "name": "1994 Vintage Badgers Rosebowl Crewneck",
     "category": "Tops",
     "price": 35,
-    "size": "M/L 20x23",
+    "size": "M/L (20x23)",
     "image": "images/product-1779648476045-4y3.jpg",
     "images": [
       "images/product-1779648476045-4y3.jpg",
