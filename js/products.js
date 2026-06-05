@@ -173,5 +173,23 @@ const products = [
     "featured": true,
     "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
     "published": true
+  },
+  {
+    "id": 11,
+    "name": "Tan Carhartt Pants Paint Splatter Thrash",
+    "category": "Bottoms",
+    "price": 45,
+    "size": "34x32",
+    "image": "images/product-1780699721492-mcq.jpg",
+    "images": [
+      "images/product-1780699721492-mcq.jpg",
+      "images/product-1780699731852-2ac.jpg",
+      "images/product-1780699737288-hbh.jpg",
+      "images/product-1780699743220-oh2.jpg",
+      "images/product-1780699748503-bl8.jpg"
+    ],
+    "featured": true,
+    "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
+    "published": true
   }
 ];
