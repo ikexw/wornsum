@@ -140,5 +140,22 @@ const products = [
     "featured": true,
     "description": "Original 1990s Wisconsin Badgers Rose Bowl crewnecks featuring classic collegiate graphics and the perfect vintage oversized fit. Heavyweight feel with naturally faded colors and worn-in character that gives each piece a true 90s look. Easy everyday layer with timeless sportswear styling.\n\nPlease note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
     "published": true
+  },
+  {
+    "id": 9,
+    "name": "Vintage Abercrombie Jersey Polo",
+    "category": "Tops",
+    "price": 30,
+    "size": "XL (22x28)",
+    "image": "images/product-1780699487676-ocx.jpg",
+    "images": [
+      "images/product-1780699487676-ocx.jpg",
+      "images/product-1780699492785-hc7.jpg",
+      "images/product-1780699496754-4dk.jpg",
+      "images/product-1780699501018-un9.jpg"
+    ],
+    "featured": true,
+    "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
+    "published": true
   }
 ];
