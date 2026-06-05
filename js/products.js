@@ -157,5 +157,21 @@ const products = [
     "featured": true,
     "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
     "published": true
+  },
+  {
+    "id": 10,
+    "name": "Vintage Orange County Choppers Tee",
+    "category": "Tops",
+    "price": 35,
+    "size": "XL",
+    "image": "images/product-1780699635012-bma.jpg",
+    "images": [
+      "images/product-1780699635012-bma.jpg",
+      "images/product-1780699640585-xez.jpg",
+      "images/product-1780699645487-g7t.jpg"
+    ],
+    "featured": true,
+    "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
+    "published": true
   }
 ];
