@@ -176,7 +176,7 @@ const products = [
   },
   {
     "id": 11,
-    "name": "Tan Carhartt Pants Paint Splatter Thrash",
+    "name": "Tan Carhartt Pants",
     "category": "Bottoms",
     "price": 45,
     "size": "34x32",
