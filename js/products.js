@@ -191,5 +191,23 @@ const products = [
     "featured": true,
     "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
     "published": true
+  },
+  {
+    "id": 12,
+    "name": "Carhartt Denim",
+    "category": "Bottoms",
+    "price": 35,
+    "size": "34x34",
+    "image": "images/product-1780699800630-gcb.jpg",
+    "images": [
+      "images/product-1780699800630-gcb.jpg",
+      "images/product-1780699805022-eec.jpg",
+      "images/product-1780699809177-dz5.jpg",
+      "images/product-1780699812939-cnt.jpg",
+      "images/product-1780699817275-rft.jpg"
+    ],
+    "featured": true,
+    "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
+    "published": true
   }
 ];
