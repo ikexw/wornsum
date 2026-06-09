@@ -209,5 +209,22 @@ const products = [
     "featured": true,
     "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
     "published": true
+  },
+  {
+    "id": 13,
+    "name": "Vintage Harley Davidson Long Sleeve",
+    "category": "Tops",
+    "price": 55,
+    "size": "XL",
+    "image": "images/product-1781041044972-xe8.jpg",
+    "images": [
+      "images/product-1781041044972-xe8.jpg",
+      "images/product-1781041050320-rjp.jpg",
+      "images/product-1781041054321-kkm.jpg",
+      "images/product-1781041058262-txn.jpg"
+    ],
+    "featured": true,
+    "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
+    "published": true
   }
 ];
