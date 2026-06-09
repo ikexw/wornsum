@@ -243,5 +243,22 @@ const products = [
     "featured": true,
     "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
     "published": true
+  },
+  {
+    "id": 15,
+    "name": "Vintage Harley Davidson Tee",
+    "category": "Tops",
+    "price": 35,
+    "size": "XL",
+    "image": "images/product-1781041152166-qxx.jpg",
+    "images": [
+      "images/product-1781041152166-qxx.jpg",
+      "images/product-1781041156532-bhh.jpg",
+      "images/product-1781041160827-56p.jpg",
+      "images/product-1781041166925-pxl.jpg"
+    ],
+    "featured": true,
+    "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
+    "published": true
   }
 ];
