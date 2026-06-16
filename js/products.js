@@ -243,7 +243,8 @@ const products = [
     ],
     "featured": true,
     "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
-    "published": true
+    "published": true,
+    "sold": true
   },
   {
     "id": 15,
