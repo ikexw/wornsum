@@ -282,5 +282,21 @@ const products = [
     "featured": true,
     "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
     "published": true
+  },
+  {
+    "id": 17,
+    "name": "Vintage Abercrombie Zip",
+    "category": "Tops",
+    "price": 75,
+    "size": "L 20x25",
+    "image": "images/product-1782159082872-f6b.jpg",
+    "images": [
+      "images/product-1782159082872-f6b.jpg",
+      "images/product-1782159086122-qlx.jpg",
+      "images/product-1782159089473-ap5.jpg"
+    ],
+    "featured": true,
+    "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
+    "published": true
   }
 ];
