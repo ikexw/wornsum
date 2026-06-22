@@ -315,5 +315,21 @@ const products = [
     "featured": true,
     "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
     "published": true
+  },
+  {
+    "id": 19,
+    "name": "Vintage Faded Nike Tee",
+    "category": "Tops",
+    "price": 35,
+    "size": "L 22x26",
+    "image": "images/product-1782159177851-qmi.jpg",
+    "images": [
+      "images/product-1782159177851-qmi.jpg",
+      "images/product-1782159181488-k5d.jpg",
+      "images/product-1782159185026-vcj.jpg"
+    ],
+    "featured": true,
+    "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
+    "published": true
   }
 ];
