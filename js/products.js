@@ -266,5 +266,21 @@ const products = [
     "featured": true,
     "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
     "published": true
+  },
+  {
+    "id": 16,
+    "name": "Vintage Aeropostale Jacket",
+    "category": "Tops",
+    "price": 45,
+    "size": "L 21x27",
+    "image": "images/product-1782159031321-082.jpg",
+    "images": [
+      "images/product-1782159031321-082.jpg",
+      "images/product-1782159034656-qp3.jpg",
+      "images/product-1782159038355-q73.jpg"
+    ],
+    "featured": true,
+    "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
+    "published": true
   }
 ];
