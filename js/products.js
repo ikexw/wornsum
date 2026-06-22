@@ -298,5 +298,22 @@ const products = [
     "featured": true,
     "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
     "published": true
+  },
+  {
+    "id": 18,
+    "name": "Vintage Camel Cigarette Tee",
+    "category": "Tops",
+    "price": 40,
+    "size": "L 22x26",
+    "image": "images/product-1782159128796-dba.jpg",
+    "images": [
+      "images/product-1782159128796-dba.jpg",
+      "images/product-1782159132886-f92.jpg",
+      "images/product-1782159136189-uwp.jpg",
+      "images/product-1782159141089-c9s.jpg"
+    ],
+    "featured": true,
+    "description": "Please note: all items are vintage and may show signs of wear including fading, distressing, cracking, or minor imperfections. Refer to measurements for the most accurate fit.",
+    "published": true
   }
 ];
